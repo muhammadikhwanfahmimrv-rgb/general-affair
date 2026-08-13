@@ -463,15 +463,6 @@ th{
     .item-row{grid-template-columns:1fr 80px 110px 35px}
 }
 
-
-/* ================= MODULE PLACEHOLDER ================= */
-.module-info{
-    background:white;
-    padding:25px;
-    border-radius:14px;
-    box-shadow:0 4px 18px #0000000d;
-}
-
 </style>
 </head>
 
@@ -535,23 +526,37 @@ onclick="showPage('inventory',this)">
 📦 Inventaris & ATK
 </div>
 
-<div class="menu" role="button" tabindex="0" onclick="showPage('procurement', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('procurement', this); event.preventDefault();}">
+<div class="menu" onclick="showPage('procurement',this)">
 🛒 Pengadaan
 </div>
 
-<div class="menu" role="button" tabindex="0" onclick="showPage('maintenance', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('maintenance', this); event.preventDefault();}">🔧 Pemeliharaan</div>
+<div class="menu" onclick="showPage('maintenance',this)">
+🔧 Pemeliharaan
+</div>
 
-<div class="menu" role="button" tabindex="0" onclick="showPage('transport', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('transport', this); event.preventDefault();}">🚗 Transportasi</div>
+<div class="menu" onclick="showPage('transport',this)">
+🚗 Transportasi
+</div>
 
-<div class="menu" role="button" tabindex="0" onclick="showPage('documents', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('documents', this); event.preventDefault();}">📄 Surat & Dokumen</div>
+<div class="menu" onclick="showPage('documents',this)">
+📄 Surat & Dokumen
+</div>
 
-<div class="menu" role="button" tabindex="0" onclick="showPage('meeting', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('meeting', this); event.preventDefault();}">🏢 Meeting Room</div>
+<div class="menu" onclick="showPage('meeting',this)">
+🏢 Meeting Room
+</div>
 
-<div class="menu" role="button" tabindex="0" onclick="showPage('pantry', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('pantry', this); event.preventDefault();}">☕ Konsumsi & Pantry</div>
+<div class="menu" onclick="showPage('pantry',this)">
+☕ Konsumsi & Pantry
+</div>
 
-<div class="menu" role="button" tabindex="0" onclick="showPage('cleaning', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('cleaning', this); event.preventDefault();}">🧹 Kebersihan</div>
+<div class="menu" onclick="showPage('cleaning',this)">
+🧹 Kebersihan
+</div>
 
-<div class="menu" role="button" tabindex="0" onclick="showPage('reports', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('reports', this); event.preventDefault();}">📊 Laporan</div>
+<div class="menu" onclick="showPage('reports',this)">
+📊 Laporan
+</div>
 
 <button
 class="logout"
@@ -784,111 +789,6 @@ Memuat data...
             <tbody id="procurementTable"></tbody>
         </table>
     </div>
-</section>
-
-
-<section id="maintenance" class="page">
-  <div class="header">
-    <div>
-      <h1>🔧 Pemeliharaan</h1>
-      <p>Kelola pemeliharaan dan perbaikan fasilitas/asset General Affair.</p>
-    </div>
-  </div>
-  <div class="card">
-    <h3>🔧 Pemeliharaan</h3>
-    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
-    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
-  </div>
-</section>
-
-
-<section id="transport" class="page">
-  <div class="header">
-    <div>
-      <h1>🚗 Transportasi</h1>
-      <p>Kelola kendaraan, perjalanan dinas, dan kebutuhan transportasi.</p>
-    </div>
-  </div>
-  <div class="card">
-    <h3>🚗 Transportasi</h3>
-    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
-    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
-  </div>
-</section>
-
-
-<section id="documents" class="page">
-  <div class="header">
-    <div>
-      <h1>📄 Surat & Dokumen</h1>
-      <p>Kelola surat masuk, surat keluar, dan arsip dokumen.</p>
-    </div>
-  </div>
-  <div class="card">
-    <h3>📄 Surat & Dokumen</h3>
-    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
-    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
-  </div>
-</section>
-
-
-<section id="meeting" class="page">
-  <div class="header">
-    <div>
-      <h1>🏢 Meeting Room</h1>
-      <p>Kelola jadwal dan penggunaan ruang meeting.</p>
-    </div>
-  </div>
-  <div class="card">
-    <h3>🏢 Meeting Room</h3>
-    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
-    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
-  </div>
-</section>
-
-
-<section id="pantry" class="page">
-  <div class="header">
-    <div>
-      <h1>☕ Konsumsi & Pantry</h1>
-      <p>Kelola konsumsi dan kebutuhan pantry.</p>
-    </div>
-  </div>
-  <div class="card">
-    <h3>☕ Konsumsi & Pantry</h3>
-    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
-    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
-  </div>
-</section>
-
-
-<section id="cleaning" class="page">
-  <div class="header">
-    <div>
-      <h1>🧹 Kebersihan</h1>
-      <p>Kelola kebutuhan dan kegiatan kebersihan.</p>
-    </div>
-  </div>
-  <div class="card">
-    <h3>🧹 Kebersihan</h3>
-    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
-    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
-  </div>
-</section>
-
-
-<section id="reports" class="page">
-  <div class="header">
-    <div>
-      <h1>📊 Laporan</h1>
-      <p>Lihat dan kelola laporan General Affair.</p>
-    </div>
-  </div>
-  <div class="card">
-    <h3>📊 Laporan</h3>
-    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
-    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
-  </div>
 </section>
 
 </main>
@@ -1180,37 +1080,23 @@ location.reload();
 /* ================= PAGE ================= */
 
 function showPage(page,element){
-    const target = document.getElementById(page);
 
-    if(!target){
-        console.error("Halaman tidak ditemukan:", page);
-        alert("Modul " + page + " belum tersedia.");
-        return false;
-    }
+document
+.querySelectorAll(".page")
+.forEach(x=>x.classList.remove("active"));
 
-    document.querySelectorAll(".page").forEach(function(x){
-        x.classList.remove("active");
-    });
+document
+.getElementById(page)
+.classList.add("active");
 
-    target.classList.add("active");
+document
+.querySelectorAll(".menu")
+.forEach(x=>x.classList.remove("active"));
 
-    document.querySelectorAll(".menu").forEach(function(x){
-        x.classList.remove("active");
-    });
+element.classList.add("active");
 
-    if(element){
-        element.classList.add("active");
-    }
-
-    if(page==="inventory" && typeof loadInventory==="function"){
-        loadInventory();
-    }
-
-    if(page==="procurement" && typeof loadProcurements==="function"){
-        loadProcurements();
-    }
-
-    return false;
+if(page==="inventory"){
+loadInventory();
 }
 if(page==="procurement"){
 loadProcurements();
