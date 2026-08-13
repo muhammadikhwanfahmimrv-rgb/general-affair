@@ -997,19 +997,2486 @@ Memuat data...
 
 
 
-<section id="transport" class="page">
-  <div class="header">
-    <div>
-      <h1>🚗 Transportasi</h1>
-      <p>Kelola kendaraan, perjalanan dinas, dan kebutuhan transportasi.</p>
-    </div>
-  </div>
-  <div class="card">
-    <h3>🚗 Transportasi</h3>
-    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
-    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
-  </div>
-</section>
+/* =========================================================
+   TRANSPORTASI
+========================================================= */
+
+const VEHICLE_KEY = "ga_transport_vehicles";
+const P2H_KEY = "ga_transport_p2h";
+const LOAN_KEY = "ga_transport_loans";
+const SERVICE_KEY = "ga_transport_services";
+
+let editingVehicleId = null;
+let editingP2HId = null;
+let editingLoanId = null;
+let editingServiceId = null;
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+function getVehicles(){
+    try{
+        return JSON.parse(localStorage.getItem(VEHICLE_KEY) || "[]");
+    }catch(e){
+        return [];
+    }
+}
+
+function saveVehicles(data){
+    localStorage.setItem(VEHICLE_KEY,JSON.stringify(data));
+}
+
+function getP2H(){
+    try{
+        return JSON.parse(localStorage.getItem(P2H_KEY) || "[]");
+    }catch(e){
+        return [];
+    }
+}
+
+function saveP2HData(data){
+    localStorage.setItem(P2H_KEY,JSON.stringify(data));
+}
+
+function getLoans(){
+    try{
+        return JSON.parse(localStorage.getItem(LOAN_KEY) || "[]");
+    }catch(e){
+        return [];
+    }
+}
+
+function saveLoans(data){
+    localStorage.setItem(LOAN_KEY,JSON.stringify(data));
+}
+
+function getServices(){
+    try{
+        return JSON.parse(localStorage.getItem(SERVICE_KEY) || "[]");
+    }catch(e){
+        return [];
+    }
+}
+
+function saveServices(data){
+    localStorage.setItem(SERVICE_KEY,JSON.stringify(data));
+}
+
+
+/* =========================================================
+   FORMAT
+========================================================= */
+
+function trNumber(n){
+    return Number(n || 0).toLocaleString("id-ID");
+}
+
+function trDate(){
+    return new Date().toISOString().slice(0,10);
+}
+
+function trMonth(){
+    return new Date().toISOString().slice(0,7);
+}
+
+
+/* =========================================================
+   TAB TRANSPORTASI
+========================================================= */
+
+function showTransportTab(page,element){
+
+    document.querySelectorAll(".transport-tab-page")
+        .forEach(x=>x.classList.remove("active"));
+
+    const target=document.getElementById(page);
+
+    if(target){
+        target.classList.add("active");
+    }
+
+    document.querySelectorAll(".transport-tab")
+        .forEach(x=>x.classList.remove("active"));
+
+    if(element){
+        element.classList.add("active");
+    }
+
+    if(page==="transportDashboard"){
+        loadTransportDashboard();
+    }
+
+    if(page==="transportP2H"){
+        loadVehicleSelects();
+        loadP2H();
+    }
+
+    if(page==="transportLoan"){
+        loadVehicleSelects();
+        loadLoans();
+    }
+
+    if(page==="transportKm"){
+        loadKmMonthSelect();
+        loadKmRecap();
+    }
+
+    if(page==="transportService"){
+        loadVehicleSelects();
+        loadServiceSchedule();
+        loadServiceHistory();
+    }
+
+    if(page==="transportVehicle"){
+        loadVehicles();
+    }
+}
+
+
+/* =========================================================
+   MASTER KENDARAAN
+========================================================= */
+
+function generateVehicleCode(){
+
+    const data=getVehicles();
+
+    return "UNIT-"+String(data.length+1).padStart(3,"0");
+}
+
+
+function openVehicleModal(id=null){
+
+    editingVehicleId=id;
+
+    document.getElementById("vehicleModal")
+        .style.display="flex";
+
+    if(id){
+
+        const x=getVehicles()
+            .find(v=>v.id===id);
+
+        if(!x)return;
+
+        document.getElementById("vehicleModalTitle")
+            .innerText="Edit Kendaraan";
+
+        document.getElementById("vehicleCode")
+            .value=x.code||"";
+
+        document.getElementById("vehiclePlate")
+            .value=x.plate||"";
+
+        document.getElementById("vehicleName")
+            .value=x.name||"";
+
+        document.getElementById("vehicleBrand")
+            .value=x.brand||"";
+
+        document.getElementById("vehicleType")
+            .value=x.type||"";
+
+        document.getElementById("vehicleYear")
+            .value=x.year||"";
+
+        document.getElementById("vehicleInitialKm")
+            .value=x.initialKm||0;
+
+        document.getElementById("vehicleServiceInterval")
+            .value=x.interval||10000;
+
+        document.getElementById("vehicleStatus")
+            .value=x.status||"Aktif";
+
+    }else{
+
+        document.getElementById("vehicleModalTitle")
+            .innerText="Tambah Kendaraan";
+
+        document.getElementById("vehicleCode")
+            .value=generateVehicleCode();
+
+        document.getElementById("vehiclePlate").value="";
+        document.getElementById("vehicleName").value="";
+        document.getElementById("vehicleBrand").value="";
+        document.getElementById("vehicleType").value="";
+        document.getElementById("vehicleYear").value="";
+        document.getElementById("vehicleInitialKm").value=0;
+        document.getElementById("vehicleServiceInterval").value=10000;
+        document.getElementById("vehicleStatus").value="Aktif";
+    }
+}
+
+
+function closeVehicleModal(){
+
+    document.getElementById("vehicleModal")
+        .style.display="none";
+
+    editingVehicleId=null;
+}
+
+
+function saveVehicle(){
+
+    const code=document.getElementById("vehicleCode")
+        .value.trim();
+
+    const plate=document.getElementById("vehiclePlate")
+        .value.trim();
+
+    const name=document.getElementById("vehicleName")
+        .value.trim();
+
+    if(!code || !plate || !name){
+
+        alert("Kode, nomor polisi dan nama kendaraan wajib diisi.");
+
+        return;
+    }
+
+    const data=getVehicles();
+
+    const record={
+
+        id:editingVehicleId || Date.now(),
+
+        code,
+
+        plate,
+
+        name,
+
+        brand:document.getElementById("vehicleBrand")
+            .value.trim(),
+
+        type:document.getElementById("vehicleType")
+            .value.trim(),
+
+        year:Number(
+            document.getElementById("vehicleYear").value || 0
+        ),
+
+        initialKm:Number(
+            document.getElementById("vehicleInitialKm").value || 0
+        ),
+
+        interval:Number(
+            document.getElementById("vehicleServiceInterval").value || 10000
+        ),
+
+        status:document.getElementById("vehicleStatus")
+            .value
+    };
+
+
+    const index=data.findIndex(
+        x=>x.id===record.id
+    );
+
+    if(index>=0){
+        data[index]=record;
+    }else{
+        data.unshift(record);
+    }
+
+    saveVehicles(data);
+
+    closeVehicleModal();
+
+    loadVehicles();
+
+    loadVehicleSelects();
+
+    loadTransportDashboard();
+
+    alert("Data kendaraan berhasil disimpan.");
+}
+
+
+function deleteVehicle(id){
+
+    if(!confirm(
+        "Hapus kendaraan ini?"
+    ))return;
+
+    saveVehicles(
+        getVehicles()
+        .filter(x=>x.id!==id)
+    );
+
+    loadVehicles();
+
+    loadVehicleSelects();
+
+    loadTransportDashboard();
+}
+
+
+function getVehicleName(id){
+
+    const x=getVehicles()
+        .find(v=>v.id===Number(id));
+
+    if(!x)return "-";
+
+    return x.name;
+}
+
+
+function getVehicle(id){
+
+    return getVehicles()
+        .find(v=>v.id===Number(id));
+}
+
+
+/* =========================================================
+   KM TERBARU
+========================================================= */
+
+function getLatestVehicleKm(vehicleId){
+
+    const vehicle=getVehicle(vehicleId);
+
+    let latest=Number(
+        vehicle?.initialKm || 0
+    );
+
+
+    const loans=getLoans()
+        .filter(x=>Number(x.vehicleId)===Number(vehicleId));
+
+    loans.forEach(x=>{
+
+        const km=Number(x.kmEnd||0);
+
+        if(km>latest){
+            latest=km;
+        }
+
+    });
+
+
+    const p2h=getP2H()
+        .filter(x=>Number(x.vehicleId)===Number(vehicleId));
+
+    p2h.forEach(x=>{
+
+        const km=Number(x.kmEnd||0);
+
+        if(km>latest){
+            latest=km;
+        }
+
+    });
+
+
+    const services=getServices()
+        .filter(x=>Number(x.vehicleId)===Number(vehicleId));
+
+    services.forEach(x=>{
+
+        const km=Number(x.km||0);
+
+        if(km>latest){
+            latest=km;
+        }
+
+    });
+
+
+    return latest;
+}
+
+
+/* =========================================================
+   STATUS SERVICE
+========================================================= */
+
+function getServiceInfo(vehicleId){
+
+    const vehicle=getVehicle(vehicleId);
+
+    if(!vehicle){
+
+        return {
+            currentKm:0,
+            lastServiceKm:0,
+            nextServiceKm:0,
+            remaining:0,
+            status:"AMAN"
+        };
+    }
+
+
+    const currentKm=getLatestVehicleKm(vehicleId);
+
+
+    const services=getServices()
+        .filter(x=>Number(x.vehicleId)===Number(vehicleId))
+        .sort((a,b)=>Number(b.km||0)-Number(a.km||0));
+
+
+    const lastServiceKm=services.length
+        ? Number(services[0].km||0)
+        : Number(vehicle.initialKm||0);
+
+
+    const interval=Number(
+        vehicle.interval || 10000
+    );
+
+
+    let nextServiceKm;
+
+
+    if(services.length){
+
+        nextServiceKm=
+            lastServiceKm+
+            interval;
+
+    }else{
+
+        nextServiceKm=
+            Math.ceil(
+                Math.max(currentKm,1) / interval
+            ) * interval;
+
+    }
+
+
+    let remaining=
+        nextServiceKm-currentKm;
+
+
+    let status="AMAN";
+
+    if(remaining<=0){
+
+        status="SERVICE";
+
+    }else if(remaining<=1000){
+
+        status="SEGERA SERVICE";
+
+    }
+
+
+    return {
+
+        currentKm,
+
+        lastServiceKm,
+
+        nextServiceKm,
+
+        remaining,
+
+        status
+
+    };
+}
+
+
+function serviceStatusHtml(status){
+
+    if(status==="SERVICE"){
+
+        return `
+        <span class="transport-status transport-danger">
+            🔴 SERVICE
+        </span>`;
+
+    }
+
+    if(status==="SEGERA SERVICE"){
+
+        return `
+        <span class="transport-status transport-warning">
+            🟡 SEGERA SERVICE
+        </span>`;
+
+    }
+
+    return `
+    <span class="transport-status transport-safe">
+        🟢 AMAN
+    </span>`;
+}
+
+
+/* =========================================================
+   LOAD KENDARAAN
+========================================================= */
+
+function loadVehicles(){
+
+    const table=
+        document.getElementById("vehicleTable");
+
+    if(!table)return;
+
+    const data=getVehicles();
+
+
+    if(!data.length){
+
+        table.innerHTML=
+        `<tr>
+            <td colspan="10">
+                Belum ada kendaraan.
+            </td>
+        </tr>`;
+
+        return;
+    }
+
+
+    table.innerHTML=data.map(x=>{
+
+        const info=getServiceInfo(x.id);
+
+        return `
+        <tr>
+
+            <td><b>${escapeHtml(x.code)}</b></td>
+
+            <td>${escapeHtml(x.plate)}</td>
+
+            <td>${escapeHtml(x.name)}</td>
+
+            <td>${escapeHtml(x.brand||"-")}</td>
+
+            <td>${x.year||"-"}</td>
+
+            <td>${trNumber(x.initialKm)}</td>
+
+            <td>${trNumber(info.currentKm)}</td>
+
+            <td>${trNumber(x.interval)} KM</td>
+
+            <td>
+                ${x.status==="Aktif"
+                    ? '<span class="transport-status transport-safe">AKTIF</span>'
+                    : '<span class="transport-status transport-danger">NONAKTIF</span>'}
+            </td>
+
+            <td>
+
+                <button
+                    class="action-edit"
+                    onclick="openVehicleModal(${x.id})">
+                    ✏️
+                </button>
+
+                <button
+                    class="action-delete"
+                    onclick="deleteVehicle(${x.id})">
+                    🗑️
+                </button>
+
+            </td>
+
+        </tr>`;
+
+    }).join("");
+}
+
+
+/* =========================================================
+   VEHICLE SELECT
+========================================================= */
+
+function loadVehicleSelects(){
+
+    const vehicles=getVehicles()
+        .filter(x=>x.status==="Aktif");
+
+
+    const selects=[
+
+        document.getElementById("p2hVehicle"),
+
+        document.getElementById("loanVehicle"),
+
+        document.getElementById("serviceVehicle")
+
+    ];
+
+
+    selects.forEach(select=>{
+
+        if(!select)return;
+
+        const current=select.value;
+
+        select.innerHTML=
+            '<option value="">Pilih Kendaraan</option>'+
+
+            vehicles.map(x=>
+
+                `<option value="${x.id}">
+                    ${escapeHtml(x.name)}
+                    - ${escapeHtml(x.plate)}
+                </option>`
+
+            ).join("");
+
+        if(current){
+            select.value=current;
+        }
+
+    });
+}
+
+
+/* =========================================================
+   P2H
+========================================================= */
+
+function generateP2HNo(){
+
+    const data=getP2H();
+
+    const ym=
+        new Date().getFullYear()+
+        String(new Date().getMonth()+1).padStart(2,"0");
+
+    return "P2H-"+ym+"-"+
+        String(data.length+1).padStart(4,"0");
+}
+
+
+function openP2HModal(id=null){
+
+    editingP2HId=id;
+
+    loadVehicleSelects();
+
+    document.getElementById("p2hModal")
+        .style.display="flex";
+
+
+    if(id){
+
+        const x=getP2H()
+            .find(a=>a.id===id);
+
+        if(!x)return;
+
+        document.getElementById("p2hModalTitle")
+            .innerText="Edit P2H";
+
+        document.getElementById("p2hNo")
+            .value=x.no;
+
+        document.getElementById("p2hDate")
+            .value=x.date;
+
+        document.getElementById("p2hVehicle")
+            .value=x.vehicleId;
+
+        document.getElementById("p2hDriver")
+            .value=x.driver;
+
+        document.getElementById("p2hKmStart")
+            .value=x.kmStart;
+
+        document.getElementById("p2hKmEnd")
+            .value=x.kmEnd;
+
+        document.getElementById("p2hTyre")
+            .value=x.tyre;
+
+        document.getElementById("p2hOil")
+            .value=x.oil;
+
+        document.getElementById("p2hBrake")
+            .value=x.brake;
+
+        document.getElementById("p2hLamp")
+            .value=x.lamp;
+
+        document.getElementById("p2hClean")
+            .value=x.clean;
+
+        document.getElementById("p2hStatus")
+            .value=x.status;
+
+        document.getElementById("p2hNotes")
+            .value=x.notes||"";
+
+    }else{
+
+        document.getElementById("p2hModalTitle")
+            .innerText="Input P2H Kendaraan";
+
+        document.getElementById("p2hNo")
+            .value=generateP2HNo();
+
+        document.getElementById("p2hDate")
+            .value=trDate();
+
+        document.getElementById("p2hVehicle").value="";
+
+        document.getElementById("p2hDriver").value="";
+
+        document.getElementById("p2hKmStart").value="";
+
+        document.getElementById("p2hKmEnd").value="";
+
+        document.getElementById("p2hTyre").value="Baik";
+
+        document.getElementById("p2hOil").value="Baik";
+
+        document.getElementById("p2hBrake").value="Baik";
+
+        document.getElementById("p2hLamp").value="Baik";
+
+        document.getElementById("p2hClean").value="Baik";
+
+        document.getElementById("p2hStatus").value="BAIK";
+
+        document.getElementById("p2hNotes").value="";
+    }
+}
+
+
+function closeP2HModal(){
+
+    document.getElementById("p2hModal")
+        .style.display="none";
+
+    editingP2HId=null;
+}
+
+
+function saveP2H(){
+
+    const vehicleId=
+        document.getElementById("p2hVehicle").value;
+
+    const driver=
+        document.getElementById("p2hDriver")
+        .value.trim();
+
+    const kmStart=
+        Number(document.getElementById("p2hKmStart").value||0);
+
+    const kmEnd=
+        Number(document.getElementById("p2hKmEnd").value||0);
+
+
+    if(!vehicleId || !driver){
+
+        alert("Kendaraan dan driver wajib diisi.");
+
+        return;
+    }
+
+
+    if(kmEnd<kmStart){
+
+        alert("KM akhir tidak boleh lebih kecil dari KM awal.");
+
+        return;
+    }
+
+
+    const data=getP2H();
+
+
+    const record={
+
+        id:editingP2HId||Date.now(),
+
+        no:document.getElementById("p2hNo").value,
+
+        date:document.getElementById("p2hDate").value,
+
+        vehicleId:Number(vehicleId),
+
+        driver,
+
+        kmStart,
+
+        kmEnd,
+
+        tyre:document.getElementById("p2hTyre").value,
+
+        oil:document.getElementById("p2hOil").value,
+
+        brake:document.getElementById("p2hBrake").value,
+
+        lamp:document.getElementById("p2hLamp").value,
+
+        clean:document.getElementById("p2hClean").value,
+
+        status:document.getElementById("p2hStatus").value,
+
+        notes:document.getElementById("p2hNotes").value.trim()
+
+    };
+
+
+    const index=data.findIndex(
+        x=>x.id===record.id
+    );
+
+
+    if(index>=0){
+        data[index]=record;
+    }else{
+        data.unshift(record);
+    }
+
+
+    saveP2HData(data);
+
+    closeP2HModal();
+
+    loadP2H();
+
+    refreshTransport();
+
+
+    alert("P2H berhasil disimpan.");
+}
+
+
+function loadP2H(){
+
+    const table=
+        document.getElementById("p2hTable");
+
+    if(!table)return;
+
+
+    const search=
+        (document.getElementById("p2hSearch")?.value||"")
+        .toLowerCase()
+        .trim();
+
+    const date=
+        document.getElementById("p2hDateFilter")?.value||"";
+
+    const status=
+        document.getElementById("p2hStatusFilter")?.value||"";
+
+
+    let data=getP2H();
+
+
+    if(search){
+
+        data=data.filter(x=>
+
+            getVehicleName(x.vehicleId)
+                .toLowerCase()
+                .includes(search)
+
+            ||
+
+            (x.driver||"")
+                .toLowerCase()
+                .includes(search)
+
+        );
+
+    }
+
+
+    if(date){
+        data=data.filter(x=>x.date===date);
+    }
+
+    if(status){
+        data=data.filter(x=>x.status===status);
+    }
+
+
+    if(!data.length){
+
+        table.innerHTML=
+        `<tr>
+            <td colspan="9">
+                Belum ada data P2H.
+            </td>
+        </tr>`;
+
+        return;
+    }
+
+
+    table.innerHTML=data.map(x=>{
+
+        const vehicle=getVehicle(x.vehicleId);
+
+        return `
+        <tr>
+
+            <td><b>${escapeHtml(x.no)}</b></td>
+
+            <td>${escapeHtml(x.date)}</td>
+
+            <td>
+                ${escapeHtml(vehicle?.name||"-")}
+                <br>
+                <small>${escapeHtml(vehicle?.plate||"")}</small>
+            </td>
+
+            <td>${escapeHtml(x.driver)}</td>
+
+            <td>${trNumber(x.kmStart)}</td>
+
+            <td>${trNumber(x.kmEnd)}</td>
+
+            <td>
+
+                Ban: ${escapeHtml(x.tyre)}
+                <br>
+                Oli: ${escapeHtml(x.oil)}
+                <br>
+                Rem: ${escapeHtml(x.brake)}
+
+            </td>
+
+            <td>
+                ${x.status==="BAIK"
+                    ? '<span class="transport-status transport-safe">✓ BAIK</span>'
+                    : '<span class="transport-status transport-danger">⚠ PERLU PERBAIKAN</span>'}
+            </td>
+
+            <td>
+
+                <button
+                    class="action-edit"
+                    onclick="openP2HModal(${x.id})">
+                    ✏️
+                </button>
+
+                <button
+                    class="action-delete"
+                    onclick="deleteP2H(${x.id})">
+                    🗑️
+                </button>
+
+            </td>
+
+        </tr>`;
+
+    }).join("");
+}
+
+
+function deleteP2H(id){
+
+    if(!confirm("Hapus data P2H ini?"))return;
+
+    saveP2HData(
+        getP2H().filter(x=>x.id!==id)
+    );
+
+    loadP2H();
+
+    refreshTransport();
+}
+
+
+/* =========================================================
+   PEMINJAMAN
+========================================================= */
+
+function generateLoanNo(){
+
+    const data=getLoans();
+
+    const ym=
+        new Date().getFullYear()+
+        String(new Date().getMonth()+1).padStart(2,"0");
+
+    return "TR-"+ym+"-"+
+        String(data.length+1).padStart(4,"0");
+}
+
+
+function openLoanModal(id=null){
+
+    editingLoanId=id;
+
+    loadVehicleSelects();
+
+    document.getElementById("loanModal")
+        .style.display="flex";
+
+
+    if(id){
+
+        const x=getLoans()
+            .find(a=>a.id===id);
+
+        if(!x)return;
+
+        document.getElementById("loanModalTitle")
+            .innerText="Edit Peminjaman";
+
+        document.getElementById("loanNo").value=x.no;
+        document.getElementById("loanDate").value=x.date;
+        document.getElementById("loanVehicle").value=x.vehicleId;
+        document.getElementById("loanDriver").value=x.driver;
+        document.getElementById("loanDestination").value=x.destination;
+        document.getElementById("loanPurpose").value=x.purpose;
+        document.getElementById("loanOut").value=x.timeOut||"";
+        document.getElementById("loanIn").value=x.timeIn||"";
+        document.getElementById("loanKmStart").value=x.kmStart;
+        document.getElementById("loanKmEnd").value=x.kmEnd||"";
+        document.getElementById("loanDistance").value=x.distance||0;
+        document.getElementById("loanStatus").value=x.status||"Dipinjam";
+        document.getElementById("loanNotes").value=x.notes||"";
+
+    }else{
+
+        document.getElementById("loanModalTitle")
+            .innerText="Peminjaman Kendaraan";
+
+        document.getElementById("loanNo")
+            .value=generateLoanNo();
+
+        document.getElementById("loanDate")
+            .value=trDate();
+
+        document.getElementById("loanVehicle").value="";
+
+        document.getElementById("loanDriver").value="";
+
+        document.getElementById("loanDestination").value="";
+
+        document.getElementById("loanPurpose").value="";
+
+        document.getElementById("loanOut").value="";
+
+        document.getElementById("loanIn").value="";
+
+        document.getElementById("loanKmStart").value="";
+
+        document.getElementById("loanKmEnd").value="";
+
+        document.getElementById("loanDistance").value=0;
+
+        document.getElementById("loanStatus").value="Dipinjam";
+
+        document.getElementById("loanNotes").value="";
+    }
+}
+
+
+function closeLoanModal(){
+
+    document.getElementById("loanModal")
+        .style.display="none";
+
+    editingLoanId=null;
+}
+
+
+function autoLoanKm(){
+
+    const vehicleId=
+        document.getElementById("loanVehicle").value;
+
+    if(!vehicleId)return;
+
+    const km=getLatestVehicleKm(vehicleId);
+
+    document.getElementById("loanKmStart")
+        .value=km;
+
+    calculateLoanDistance();
+}
+
+
+function calculateLoanDistance(){
+
+    const start=
+        Number(document.getElementById("loanKmStart").value||0);
+
+    const end=
+        Number(document.getElementById("loanKmEnd").value||0);
+
+    const distance=
+        end>=start
+        ? end-start
+        : 0;
+
+    document.getElementById("loanDistance")
+        .value=distance;
+}
+
+
+function saveLoan(){
+
+    const vehicleId=
+        document.getElementById("loanVehicle").value;
+
+    const driver=
+        document.getElementById("loanDriver").value.trim();
+
+    const kmStart=
+        Number(document.getElementById("loanKmStart").value||0);
+
+    const kmEnd=
+        Number(document.getElementById("loanKmEnd").value||0);
+
+
+    if(!vehicleId || !driver){
+
+        alert("Kendaraan dan driver wajib diisi.");
+
+        return;
+    }
+
+
+    if(kmEnd>0 && kmEnd<kmStart){
+
+        alert("KM akhir tidak boleh lebih kecil dari KM awal.");
+
+        return;
+    }
+
+
+    const distance=
+        kmEnd>0
+        ? kmEnd-kmStart
+        : 0;
+
+
+    const data=getLoans();
+
+
+    const record={
+
+        id:editingLoanId||Date.now(),
+
+        no:document.getElementById("loanNo").value,
+
+        date:document.getElementById("loanDate").value,
+
+        vehicleId:Number(vehicleId),
+
+        driver,
+
+        destination:
+            document.getElementById("loanDestination")
+            .value.trim(),
+
+        purpose:
+            document.getElementById("loanPurpose")
+            .value.trim(),
+
+        timeOut:
+            document.getElementById("loanOut").value,
+
+        timeIn:
+            document.getElementById("loanIn").value,
+
+        kmStart,
+
+        kmEnd,
+
+        distance,
+
+        status:
+            document.getElementById("loanStatus").value,
+
+        notes:
+            document.getElementById("loanNotes")
+            .value.trim()
+
+    };
+
+
+    const index=data.findIndex(
+        x=>x.id===record.id
+    );
+
+
+    if(index>=0){
+        data[index]=record;
+    }else{
+        data.unshift(record);
+    }
+
+
+    saveLoans(data);
+
+    closeLoanModal();
+
+    loadLoans();
+
+    refreshTransport();
+
+
+    alert("Peminjaman berhasil disimpan.");
+}
+
+
+function loadLoans(){
+
+    const table=
+        document.getElementById("loanTable");
+
+    if(!table)return;
+
+
+    const search=
+        (document.getElementById("loanSearch")?.value||"")
+        .toLowerCase()
+        .trim();
+
+    const month=
+        document.getElementById("loanMonthFilter")?.value||"";
+
+
+    let data=getLoans();
+
+
+    if(search){
+
+        data=data.filter(x=>
+
+            getVehicleName(x.vehicleId)
+                .toLowerCase()
+                .includes(search)
+
+            ||
+
+            (x.driver||"")
+                .toLowerCase()
+                .includes(search)
+
+            ||
+
+            (x.destination||"")
+                .toLowerCase()
+                .includes(search)
+
+        );
+
+    }
+
+
+    if(month){
+
+        data=data.filter(x=>
+            String(x.date||"").startsWith(month)
+        );
+
+    }
+
+
+    if(!data.length){
+
+        table.innerHTML=
+        `<tr>
+            <td colspan="9">
+                Belum ada data peminjaman.
+            </td>
+        </tr>`;
+
+        return;
+    }
+
+
+    table.innerHTML=data.map(x=>{
+
+        const vehicle=getVehicle(x.vehicleId);
+
+        return `
+        <tr>
+
+            <td><b>${escapeHtml(x.no)}</b></td>
+
+            <td>${escapeHtml(x.date)}</td>
+
+            <td>
+                ${escapeHtml(vehicle?.name||"-")}
+                <br>
+                <small>${escapeHtml(vehicle?.plate||"")}</small>
+            </td>
+
+            <td>${escapeHtml(x.driver)}</td>
+
+            <td>
+                ${escapeHtml(x.destination||"-")}
+            </td>
+
+            <td>${trNumber(x.kmStart)}</td>
+
+            <td>${x.kmEnd?trNumber(x.kmEnd):"-"}</td>
+
+            <td>
+                <b>${trNumber(x.distance)} KM</b>
+            </td>
+
+            <td>
+
+                <button
+                    class="action-edit"
+                    onclick="openLoanModal(${x.id})">
+                    ✏️
+                </button>
+
+                <button
+                    class="action-delete"
+                    onclick="deleteLoan(${x.id})">
+                    🗑️
+                </button>
+
+            </td>
+
+        </tr>`;
+
+    }).join("");
+}
+
+
+function deleteLoan(id){
+
+    if(!confirm(
+        "Hapus data peminjaman ini?"
+    ))return;
+
+    saveLoans(
+        getLoans().filter(x=>x.id!==id)
+    );
+
+    loadLoans();
+
+    refreshTransport();
+}
+
+
+/* =========================================================
+   REKAP KM BULANAN
+========================================================= */
+
+function loadKmMonthSelect(){
+
+    const selects=[
+
+        document.getElementById("kmMonthFilter"),
+
+        document.getElementById("transportDashboardMonth")
+
+    ];
+
+    const current=trMonth();
+
+    selects.forEach(select=>{
+
+        if(!select)return;
+
+        let months=[];
+
+        const loans=getLoans();
+
+        loans.forEach(x=>{
+
+            if(x.date){
+
+                const m=x.date.slice(0,7);
+
+                if(!months.includes(m)){
+                    months.push(m);
+                }
+
+            }
+
+        });
+
+
+        if(!months.includes(current)){
+            months.push(current);
+        }
+
+
+        months.sort().reverse();
+
+
+        select.innerHTML=months.map(m=>{
+
+            const [year,month]=m.split("-");
+
+            const date=new Date(
+                Number(year),
+                Number(month)-1,
+                1
+            );
+
+            const label=date.toLocaleDateString(
+                "id-ID",
+                {
+                    month:"long",
+                    year:"numeric"
+                }
+            );
+
+            return `
+                <option value="${m}">
+                    ${label}
+                </option>`;
+
+        }).join("");
+
+
+        select.value=current;
+
+    });
+}
+
+
+function loadKmRecap(){
+
+    const month=
+        document.getElementById("kmMonthFilter")?.value
+        ||trMonth();
+
+
+    const loans=getLoans()
+        .filter(x=>
+            String(x.date||"").startsWith(month)
+        );
+
+
+    const vehicles=getVehicles();
+
+
+    let totalKm=0;
+
+    let totalTrip=0;
+
+
+    const rows=vehicles.map(vehicle=>{
+
+        const data=loans.filter(
+            x=>Number(x.vehicleId)===Number(vehicle.id)
+        );
+
+
+        const distance=data.reduce(
+            (sum,x)=>
+                sum+Number(x.distance||0),
+            0
+        );
+
+
+        totalKm+=distance;
+
+        totalTrip+=data.length;
+
+
+        const kms=data
+            .map(x=>Number(x.kmStart||0))
+            .filter(x=>x>0);
+
+        const kmEnds=data
+            .map(x=>Number(x.kmEnd||0))
+            .filter(x=>x>0);
+
+
+        const kmStart=kms.length
+            ? Math.min(...kms)
+            : 0;
+
+        const kmEnd=kmEnds.length
+            ? Math.max(...kmEnds)
+            : 0;
+
+
+        return {
+
+            vehicle,
+
+            trips:data.length,
+
+            distance,
+
+            kmStart,
+
+            kmEnd
+
+        };
+
+    }).filter(x=>
+        x.trips>0
+    );
+
+
+    document.getElementById("kmRecapTotal")
+        .innerText=trNumber(totalKm)+" KM";
+
+    document.getElementById("kmRecapTrip")
+        .innerText=trNumber(totalTrip);
+
+    document.getElementById("kmRecapAverage")
+        .innerText=
+        totalTrip
+        ? trNumber(
+            Math.round(totalKm/totalTrip)
+        )+" KM"
+        : "0 KM";
+
+
+    const table=
+        document.getElementById("kmRecapTable");
+
+
+    if(!rows.length){
+
+        table.innerHTML=
+        `<tr>
+            <td colspan="7">
+                Belum ada perjalanan pada bulan ini.
+            </td>
+        </tr>`;
+
+        return;
+    }
+
+
+    table.innerHTML=rows.map(x=>{
+
+        const average=
+            x.trips
+            ? Math.round(x.distance/x.trips)
+            : 0;
+
+
+        return `
+        <tr>
+
+            <td>
+                <b>${escapeHtml(x.vehicle.name)}</b>
+            </td>
+
+            <td>
+                ${escapeHtml(x.vehicle.plate)}
+            </td>
+
+            <td>
+                ${trNumber(x.kmStart)}
+            </td>
+
+            <td>
+                ${trNumber(x.kmEnd)}
+            </td>
+
+            <td>
+                ${trNumber(x.trips)}
+            </td>
+
+            <td>
+                <b>${trNumber(x.distance)} KM</b>
+            </td>
+
+            <td>
+                ${trNumber(average)} KM
+            </td>
+
+        </tr>`;
+
+    }).join("");
+}
+
+
+/* =========================================================
+   EXPORT KM CSV
+========================================================= */
+
+function exportKmRecap(){
+
+    const month=
+        document.getElementById("kmMonthFilter")?.value
+        ||trMonth();
+
+
+    const loans=getLoans()
+        .filter(x=>
+            String(x.date||"").startsWith(month)
+        );
+
+
+    const rows=[
+        [
+            "Tanggal",
+            "No Peminjaman",
+            "Kendaraan",
+            "No Polisi",
+            "Driver",
+            "Tujuan",
+            "KM Awal",
+            "KM Akhir",
+            "Jarak Tempuh"
+        ]
+    ];
+
+
+    loans.forEach(x=>{
+
+        const vehicle=getVehicle(x.vehicleId);
+
+        rows.push([
+
+            x.date,
+
+            x.no,
+
+            vehicle?.name||"",
+
+            vehicle?.plate||"",
+
+            x.driver||"",
+
+            x.destination||"",
+
+            x.kmStart||0,
+
+            x.kmEnd||0,
+
+            x.distance||0
+
+        ]);
+
+    });
+
+
+    const csv=rows.map(row=>
+
+        row.map(value=>
+
+            `"${String(value)
+                .replace(/"/g,'""')}"`
+
+        ).join(",")
+
+    ).join("\n");
+
+
+    const blob=new Blob(
+        ["\ufeff"+csv],
+        {type:"text/csv;charset=utf-8;"}
+    );
+
+
+    const url=
+        URL.createObjectURL(blob);
+
+
+    const a=
+        document.createElement("a");
+
+    a.href=url;
+
+    a.download=
+        "Rekap_KM_"+month+".csv";
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+
+/* =========================================================
+   SERVICE
+========================================================= */
+
+function openServiceModal(){
+
+    editingServiceId=null;
+
+    loadVehicleSelects();
+
+    document.getElementById("serviceModal")
+        .style.display="flex";
+
+    document.getElementById("serviceModalTitle")
+        .innerText="Input Service Kendaraan";
+
+    document.getElementById("serviceDate")
+        .value=trDate();
+
+    document.getElementById("serviceVehicle")
+        .value="";
+
+    document.getElementById("serviceKm")
+        .value="";
+
+    document.getElementById("serviceNextKm")
+        .value="";
+
+    document.getElementById("serviceType")
+        .value="Service Berkala";
+
+    document.getElementById("serviceVendor")
+        .value="";
+
+    document.getElementById("serviceCost")
+        .value=0;
+
+    document.getElementById("serviceNotes")
+        .value="";
+}
+
+
+function closeServiceModal(){
+
+    document.getElementById("serviceModal")
+        .style.display="none";
+
+    editingServiceId=null;
+}
+
+
+function autoServiceKm(){
+
+    const vehicleId=
+        document.getElementById("serviceVehicle")
+        .value;
+
+    if(!vehicleId)return;
+
+
+    const vehicle=getVehicle(vehicleId);
+
+    const currentKm=
+        getLatestVehicleKm(vehicleId);
+
+
+    const interval=
+        Number(vehicle?.interval||10000);
+
+
+    const next=
+        Math.ceil(
+            Math.max(currentKm,1)/interval
+        )*interval;
+
+
+    document.getElementById("serviceKm")
+        .value=currentKm;
+
+
+    document.getElementById("serviceNextKm")
+        .value=next;
+}
+
+
+document.addEventListener(
+    "input",
+    function(e){
+
+        if(e.target.id==="serviceKm"){
+
+            const vehicleId=
+                document.getElementById("serviceVehicle")
+                .value;
+
+            const km=
+                Number(e.target.value||0);
+
+            const vehicle=getVehicle(vehicleId);
+
+            const interval=
+                Number(vehicle?.interval||10000);
+
+
+            if(km){
+
+                const next=
+                    Math.ceil(km/interval)
+                    *interval;
+
+                document.getElementById("serviceNextKm")
+                    .value=next;
+
+            }
+
+        }
+
+    }
+);
+
+
+function saveService(){
+
+    const vehicleId=
+        document.getElementById("serviceVehicle")
+        .value;
+
+    const km=
+        Number(document.getElementById("serviceKm").value||0);
+
+
+    if(!vehicleId || !km){
+
+        alert(
+            "Kendaraan dan KM service wajib diisi."
+        );
+
+        return;
+    }
+
+
+    const vehicle=getVehicle(vehicleId);
+
+
+    const interval=
+        Number(vehicle?.interval||10000);
+
+
+    const next=
+        Math.ceil(km/interval)
+        *interval;
+
+
+    const data=getServices();
+
+
+    const record={
+
+        id:editingServiceId||Date.now(),
+
+        date:
+            document.getElementById("serviceDate").value,
+
+        vehicleId:Number(vehicleId),
+
+        km,
+
+        nextKm:next,
+
+        type:
+            document.getElementById("serviceType").value,
+
+        vendor:
+            document.getElementById("serviceVendor")
+            .value.trim(),
+
+        cost:
+            Number(
+                document.getElementById("serviceCost").value||0
+            ),
+
+        notes:
+            document.getElementById("serviceNotes")
+            .value.trim()
+
+    };
+
+
+    const index=data.findIndex(
+        x=>x.id===record.id
+    );
+
+
+    if(index>=0){
+        data[index]=record;
+    }else{
+        data.unshift(record);
+    }
+
+
+    saveServices(data);
+
+    closeServiceModal();
+
+    loadServiceSchedule();
+
+    loadServiceHistory();
+
+    refreshTransport();
+
+
+    alert(
+        "Service kendaraan berhasil disimpan."
+    );
+}
+
+
+function loadServiceSchedule(){
+
+    const table=
+        document.getElementById("serviceScheduleTable");
+
+    if(!table)return;
+
+
+    const vehicles=getVehicles();
+
+
+    if(!vehicles.length){
+
+        table.innerHTML=
+        `<tr>
+            <td colspan="8">
+                Belum ada kendaraan.
+            </td>
+        </tr>`;
+
+        return;
+    }
+
+
+    table.innerHTML=vehicles.map(vehicle=>{
+
+        const info=
+            getServiceInfo(vehicle.id);
+
+
+        return `
+        <tr>
+
+            <td>
+                <b>${escapeHtml(vehicle.name)}</b>
+            </td>
+
+            <td>
+                ${escapeHtml(vehicle.plate)}
+            </td>
+
+            <td>
+                ${trNumber(info.currentKm)}
+            </td>
+
+            <td>
+                ${trNumber(info.lastServiceKm)}
+            </td>
+
+            <td>
+                <b>${trNumber(info.nextServiceKm)}</b>
+            </td>
+
+            <td>
+
+                ${
+                    info.remaining<=0
+                    ? '<span style="color:#dc3545;font-weight:bold">-'+trNumber(Math.abs(info.remaining))+' KM</span>'
+                    : trNumber(info.remaining)+' KM'
+                }
+
+            </td>
+
+            <td>
+                ${serviceStatusHtml(info.status)}
+            </td>
+
+            <td>
+
+                <button
+                    class="btn-primary"
+                    style="padding:7px 10px"
+                    onclick="openServiceModalForVehicle(${vehicle.id})">
+                    🔧 Service
+                </button>
+
+            </td>
+
+        </tr>`;
+
+    }).join("");
+}
+
+
+function openServiceModalForVehicle(vehicleId){
+
+    openServiceModal();
+
+    document.getElementById("serviceVehicle")
+        .value=vehicleId;
+
+    autoServiceKm();
+}
+
+
+function loadServiceHistory(){
+
+    const table=
+        document.getElementById("serviceHistoryTable");
+
+    if(!table)return;
+
+
+    const data=getServices();
+
+
+    if(!data.length){
+
+        table.innerHTML=
+        `<tr>
+            <td colspan="8">
+                Belum ada riwayat service.
+            </td>
+        </tr>`;
+
+        return;
+    }
+
+
+    table.innerHTML=data.map(x=>{
+
+        const vehicle=getVehicle(x.vehicleId);
+
+        return `
+        <tr>
+
+            <td>${escapeHtml(x.date)}</td>
+
+            <td>
+                ${escapeHtml(vehicle?.name||"-")}
+                <br>
+                <small>${escapeHtml(vehicle?.plate||"")}</small>
+            </td>
+
+            <td>
+                ${trNumber(x.km)} KM
+            </td>
+
+            <td>
+                ${escapeHtml(x.type)}
+            </td>
+
+            <td>
+                ${escapeHtml(x.vendor||"-")}
+            </td>
+
+            <td>
+                Rp ${trNumber(x.cost)}
+            </td>
+
+            <td>
+                ${escapeHtml(x.notes||"-")}
+            </td>
+
+            <td>
+
+                <button
+                    class="action-delete"
+                    onclick="deleteService(${x.id})">
+                    🗑️
+                </button>
+
+            </td>
+
+        </tr>`;
+
+    }).join("");
+}
+
+
+function deleteService(id){
+
+    if(!confirm(
+        "Hapus riwayat service ini?"
+    ))return;
+
+
+    saveServices(
+        getServices().filter(x=>x.id!==id)
+    );
+
+
+    loadServiceSchedule();
+
+    loadServiceHistory();
+
+    refreshTransport();
+}
+
+
+/* =========================================================
+   DASHBOARD TRANSPORTASI
+========================================================= */
+
+function loadTransportDashboard(){
+
+    loadKmMonthSelect();
+
+
+    const vehicles=getVehicles();
+
+
+    const table=
+        document.getElementById(
+            "transportDashboardVehicleTable"
+        );
+
+
+    if(table){
+
+        table.innerHTML=vehicles.length
+
+        ? vehicles.map(vehicle=>{
+
+            const info=
+                getServiceInfo(vehicle.id);
+
+            return `
+            <tr>
+
+                <td>
+                    <b>${escapeHtml(vehicle.name)}</b>
+                </td>
+
+                <td>
+                    ${escapeHtml(vehicle.plate)}
+                </td>
+
+                <td>
+                    ${trNumber(info.currentKm)}
+                </td>
+
+                <td>
+                    ${trNumber(info.nextServiceKm)}
+                </td>
+
+                <td>
+                    ${
+                        info.remaining<=0
+                        ? "Lewat "+trNumber(Math.abs(info.remaining))+" KM"
+                        : trNumber(info.remaining)+" KM"
+                    }
+                </td>
+
+                <td>
+                    ${serviceStatusHtml(info.status)}
+                </td>
+
+            </tr>`;
+
+        }).join("")
+
+        : `<tr>
+            <td colspan="6">
+                Belum ada kendaraan.
+            </td>
+        </tr>`;
+
+    }
+
+
+    const alertBox=
+        document.getElementById(
+            "transportServiceAlert"
+        );
+
+
+    if(alertBox){
+
+        const alerts=vehicles
+
+            .map(vehicle=>{
+
+                const info=
+                    getServiceInfo(vehicle.id);
+
+                return {
+                    vehicle,
+                    info
+                };
+
+            })
+
+            .filter(x=>
+                x.info.status!=="AMAN"
+            )
+
+            .sort((a,b)=>
+                a.info.remaining-b.info.remaining
+            );
+
+
+        if(!alerts.length){
+
+            alertBox.innerHTML=
+            `<div class="transport-alert transport-alert-safe">
+                🟢 Semua kendaraan masih dalam kondisi aman dari jadwal service.
+            </div>`;
+
+        }else{
+
+            alertBox.innerHTML=
+                alerts.map(x=>{
+
+                    const danger=
+                        x.info.status==="SERVICE";
+
+                    return `
+                    <div class="
+                        transport-alert
+                        ${danger
+                            ? "transport-alert-danger"
+                            : ""}
+                    ">
+
+                        <b>
+                            ${escapeHtml(x.vehicle.name)}
+                            -
+                            ${escapeHtml(x.vehicle.plate)}
+                        </b>
+
+                        <br>
+
+                        KM sekarang:
+                        <b>${trNumber(x.info.currentKm)}</b>
+
+                        <br>
+
+                        Service:
+                        <b>${trNumber(x.info.nextServiceKm)}</b>
+
+                        <br>
+
+                        ${
+                            x.info.remaining<=0
+                            ? "Sudah melewati jadwal service."
+                            : "Sisa "+trNumber(x.info.remaining)+" KM."
+                        }
+
+                    </div>`;
+
+                }).join("");
+
+        }
+
+    }
+
+
+    const month=
+        document.getElementById(
+            "transportDashboardMonth"
+        )?.value||trMonth();
+
+
+    const loans=getLoans()
+        .filter(x=>
+            String(x.date||"").startsWith(month)
+        );
+
+
+    const kmTable=
+        document.getElementById(
+            "transportDashboardKmTable"
+        );
+
+
+    if(kmTable){
+
+        const rows=vehicles.map(vehicle=>{
+
+            const data=loans.filter(
+                x=>Number(x.vehicleId)===Number(vehicle.id)
+            );
+
+            const distance=data.reduce(
+                (sum,x)=>
+                    sum+Number(x.distance||0),
+                0
+            );
+
+            return {
+
+                vehicle,
+
+                trips:data.length,
+
+                distance
+
+            };
+
+        }).filter(x=>x.trips>0);
+
+
+        kmTable.innerHTML=rows.length
+
+        ? rows.map(x=>`
+
+            <tr>
+
+                <td>
+                    <b>${escapeHtml(x.vehicle.name)}</b>
+                </td>
+
+                <td>
+                    ${escapeHtml(x.vehicle.plate)}
+                </td>
+
+                <td>
+                    ${trNumber(x.trips)}
+                </td>
+
+                <td>
+                    <b>${trNumber(x.distance)} KM</b>
+                </td>
+
+            </tr>
+
+        `).join("")
+
+        : `<tr>
+            <td colspan="4">
+                Belum ada perjalanan pada bulan ini.
+            </td>
+        </tr>`;
+
+    }
+
+}
+
+
+/* =========================================================
+   SUMMARY
+========================================================= */
+
+function refreshTransport(){
+
+    const vehicles=getVehicles();
+
+    const today=trDate();
+
+    const month=trMonth();
+
+
+    const p2hToday=getP2H()
+        .filter(x=>x.date===today);
+
+
+    const loansMonth=getLoans()
+        .filter(x=>
+            String(x.date||"").startsWith(month)
+        );
+
+
+    const kmMonth=loansMonth.reduce(
+        (sum,x)=>
+            sum+Number(x.distance||0),
+        0
+    );
+
+
+    const needService=vehicles
+        .filter(x=>{
+
+            const status=
+                getServiceInfo(x.id).status;
+
+            return status!=="AMAN";
+
+        }).length;
+
+
+    const total=
+        document.getElementById("trTotalVehicle");
+
+    const p2h=
+        document.getElementById("trP2HToday");
+
+    const loan=
+        document.getElementById("trLoanMonth");
+
+    const km=
+        document.getElementById("trKmMonth");
+
+    const service=
+        document.getElementById("trNeedService");
+
+
+    if(total)
+        total.innerText=vehicles.length;
+
+    if(p2h)
+        p2h.innerText=p2hToday.length;
+
+    if(loan)
+        loan.innerText=loansMonth.length;
+
+    if(km)
+        km.innerText=trNumber(kmMonth);
+
+    if(service)
+        service.innerText=needService;
+
+
+    loadTransportDashboard();
+
+}
+
+
+/* =========================================================
+   INIT TRANSPORTASI
+========================================================= */
+
+function initTransport(){
+
+    loadVehicleSelects();
+
+    loadKmMonthSelect();
+
+    loadVehicles();
+
+    loadP2H();
+
+    loadLoans();
+
+    loadKmRecap();
+
+    loadServiceSchedule();
+
+    loadServiceHistory();
+
+    refreshTransport();
+
+}
+
+
+/* =========================================================
+   UPDATE showPage()
+   Tambahkan bagian ini ke fungsi showPage Anda
+========================================================= */
+
+const originalShowPage=showPage;
+
+showPage=function(page,element){
+
+    const result=
+        originalShowPage(page,element);
+
+
+    if(page==="transport"){
+
+        initTransport();
+
+    }
+
+
+    return result;
+};
+
+
+/* Jalankan ketika halaman selesai */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        initTransport();
+
+    }
+);
 
 
 <section id="documents" class="page">
