@@ -463,6 +463,35 @@ th{
     .item-row{grid-template-columns:1fr 80px 110px 35px}
 }
 
+
+/* ================= MODULE PLACEHOLDER ================= */
+.module-info{
+    background:white;
+    padding:25px;
+    border-radius:14px;
+    box-shadow:0 4px 18px #0000000d;
+}
+
+
+/* ================= PEMELIHARAAN MODULE ================= */
+.maintenance-summary{margin-bottom:20px}
+.maint-status{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:bold;
+}
+.maint-waiting{background:#fff3cd;color:#856404}
+.maint-approved{background:#d1e7dd;color:#0f5132}
+.maint-working{background:#cfe2ff;color:#084298}
+.maint-done{background:#d1e7dd;color:#0f5132}
+.maint-actions{display:flex;gap:5px;flex-wrap:wrap}
+.maint-actions button{padding:7px 9px;border-radius:6px;font-size:12px}
+.maint-edit{background:#ffc107}
+.maint-delete{background:#dc3545;color:white}
+.maint-next{background:#1769e8;color:white}
+
 </style>
 </head>
 
@@ -530,33 +559,19 @@ onclick="showPage('inventory',this)">
 🛒 Pengadaan
 </div>
 
-<div class="menu" onclick="showPage('maintenance',this)">
-🔧 Pemeliharaan
-</div>
+<div class="menu" role="button" tabindex="0" onclick="showPage('maintenance', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('maintenance', this); event.preventDefault();}">🔧 Pemeliharaan</div>
 
-<div class="menu" onclick="showPage('transport',this)">
-🚗 Transportasi
-</div>
+<div class="menu" role="button" tabindex="0" onclick="showPage('transport', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('transport', this); event.preventDefault();}">🚗 Transportasi</div>
 
-<div class="menu" onclick="showPage('documents',this)">
-📄 Surat & Dokumen
-</div>
+<div class="menu" role="button" tabindex="0" onclick="showPage('documents', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('documents', this); event.preventDefault();}">📄 Surat & Dokumen</div>
 
-<div class="menu" onclick="showPage('meeting',this)">
-🏢 Meeting Room
-</div>
+<div class="menu" role="button" tabindex="0" onclick="showPage('meeting', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('meeting', this); event.preventDefault();}">🏢 Meeting Room</div>
 
-<div class="menu" onclick="showPage('pantry',this)">
-☕ Konsumsi & Pantry
-</div>
+<div class="menu" role="button" tabindex="0" onclick="showPage('pantry', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('pantry', this); event.preventDefault();}">☕ Konsumsi & Pantry</div>
 
-<div class="menu" onclick="showPage('cleaning',this)">
-🧹 Kebersihan
-</div>
+<div class="menu" role="button" tabindex="0" onclick="showPage('cleaning', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('cleaning', this); event.preventDefault();}">🧹 Kebersihan</div>
 
-<div class="menu" onclick="showPage('reports',this)">
-📊 Laporan
-</div>
+<div class="menu" role="button" tabindex="0" onclick="showPage('reports', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('reports', this); event.preventDefault();}">📊 Laporan</div>
 
 <button
 class="logout"
@@ -789,6 +804,290 @@ Memuat data...
             <tbody id="procurementTable"></tbody>
         </table>
     </div>
+</section>
+
+
+
+<!-- ================= PEMELIHARAAN ================= -->
+<section id="maintenance" class="page">
+    <div class="header">
+        <div>
+            <h1>🔧 Pemeliharaan</h1>
+            <p>Monitoring pemeliharaan, perbaikan asset, kendaraan, fasilitas, dan vendor.</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-primary" onclick="openMaintenanceModal()">➕ Tambah Pemeliharaan</button>
+            <button class="btn-primary" onclick="openVendorModal()">👤 Master Vendor</button>
+        </div>
+    </div>
+
+    <div class="cards maintenance-summary">
+        <div class="card">🔧 Total Pemeliharaan<span class="number" id="maintTotal">0</span></div>
+        <div class="card">⏳ Menunggu<span class="number" id="maintWaiting">0</span></div>
+        <div class="card">🛠️ Dikerjakan<span class="number" id="maintWorking">0</span></div>
+        <div class="card">✅ Selesai<span class="number" id="maintDone">0</span></div>
+    </div>
+
+    <div class="table-box">
+        <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap">
+            <input class="search" style="margin:0;flex:1;min-width:240px"
+                   id="maintSearch"
+                   placeholder="🔍 Cari kendaraan, asset, kerusakan, atau vendor..."
+                   oninput="loadMaintenance()">
+            <select id="maintStatusFilter" onchange="loadMaintenance()"
+                    style="padding:13px;border:1px solid #ddd;border-radius:9px">
+                <option value="">Semua Status</option>
+                <option>Menunggu</option>
+                <option>Disetujui</option>
+                <option>Dikerjakan</option>
+                <option>Selesai</option>
+            </select>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Tanggal</th>
+                    <th>Asset/Kendaraan</th>
+                    <th>Jenis</th>
+                    <th>Keluhan/Kerusakan</th>
+                    <th>Vendor/Teknisi</th>
+                    <th>Biaya</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="maintenanceTable">
+                <tr><td colspan="9">Belum ada data pemeliharaan.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ================= MODAL PEMELIHARAAN ================= -->
+<div class="modal" id="maintenanceModal">
+    <div class="modal-box" style="width:700px">
+        <h2 id="maintModalTitle">Tambah Pemeliharaan</h2>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>No. Pemeliharaan</label>
+                <input id="maintNo" readonly>
+            </div>
+            <div class="form-group">
+                <label>Tanggal</label>
+                <input id="maintDate" type="date">
+            </div>
+            <div class="form-group">
+                <label>Asset / Kendaraan</label>
+                <input id="maintAsset" placeholder="Contoh: Fortuner / AC Ruang Meeting">
+            </div>
+            <div class="form-group">
+                <label>Jenis Pemeliharaan</label>
+                <select id="maintType">
+                    <option>Service</option>
+                    <option>Perbaikan</option>
+                    <option>Pemeriksaan</option>
+                    <option>Penggantian Sparepart</option>
+                    <option>Preventive Maintenance</option>
+                    <option>Lainnya</option>
+                </select>
+            </div>
+            <div class="form-group full">
+                <label>Keluhan / Kerusakan</label>
+                <input id="maintProblem" placeholder="Jelaskan kerusakan atau kebutuhan pemeliharaan">
+            </div>
+            <div class="form-group">
+                <label>Vendor / Teknisi</label>
+                <select id="maintVendor"></select>
+            </div>
+            <div class="form-group">
+                <label>Estimasi Biaya</label>
+                <input id="maintEstimate" type="number" min="0" value="0">
+            </div>
+            <div class="form-group">
+                <label>Biaya Aktual</label>
+                <input id="maintActual" type="number" min="0" value="0">
+            </div>
+            <div class="form-group">
+                <label>Tanggal Selesai</label>
+                <input id="maintDoneDate" type="date">
+            </div>
+            <div class="form-group full">
+                <label>Status</label>
+                <select id="maintStatus">
+                    <option>Menunggu</option>
+                    <option>Disetujui</option>
+                    <option>Dikerjakan</option>
+                    <option>Selesai</option>
+                </select>
+            </div>
+            <div class="form-group full">
+                <label>Keterangan</label>
+                <input id="maintNotes" placeholder="Catatan tambahan">
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="cancel-btn" onclick="closeMaintenanceModal()">Batal</button>
+            <button class="save-btn" onclick="saveMaintenance()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL VENDOR ================= -->
+<div class="modal" id="vendorModal">
+    <div class="modal-box" style="width:650px">
+        <h2>Master Vendor</h2>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Kode Vendor</label>
+                <input id="vendorCode" placeholder="VDR-001">
+            </div>
+            <div class="form-group">
+                <label>Nama Vendor</label>
+                <input id="vendorName" placeholder="Nama perusahaan/vendor">
+            </div>
+            <div class="form-group">
+                <label>Kategori/Jasa</label>
+                <input id="vendorCategory" placeholder="Contoh: Bengkel, AC, Listrik">
+            </div>
+            <div class="form-group">
+                <label>PIC</label>
+                <input id="vendorPic" placeholder="Nama PIC">
+            </div>
+            <div class="form-group">
+                <label>No. Telepon</label>
+                <input id="vendorPhone" placeholder="08xxxxxxxxxx">
+            </div>
+            <div class="form-group">
+                <label>NPWP</label>
+                <input id="vendorNpwp" placeholder="NPWP vendor">
+            </div>
+            <div class="form-group full">
+                <label>Alamat</label>
+                <input id="vendorAddress" placeholder="Alamat vendor">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="vendorStatus">
+                    <option>Aktif</option>
+                    <option>Nonaktif</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Rekening</label>
+                <input id="vendorAccount" placeholder="Bank / No. rekening">
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="cancel-btn" onclick="closeVendorModal()">Tutup</button>
+            <button class="save-btn" onclick="saveVendor()">Simpan Vendor</button>
+        </div>
+
+        <div class="table-box" style="margin-top:20px;padding:10px">
+            <table style="min-width:650px">
+                <thead>
+                    <tr><th>Kode</th><th>Vendor</th><th>Kategori</th><th>PIC</th><th>Telepon</th><th>Status</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="vendorTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<section id="transport" class="page">
+  <div class="header">
+    <div>
+      <h1>🚗 Transportasi</h1>
+      <p>Kelola kendaraan, perjalanan dinas, dan kebutuhan transportasi.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>🚗 Transportasi</h3>
+    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
+    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
+  </div>
+</section>
+
+
+<section id="documents" class="page">
+  <div class="header">
+    <div>
+      <h1>📄 Surat & Dokumen</h1>
+      <p>Kelola surat masuk, surat keluar, dan arsip dokumen.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>📄 Surat & Dokumen</h3>
+    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
+    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
+  </div>
+</section>
+
+
+<section id="meeting" class="page">
+  <div class="header">
+    <div>
+      <h1>🏢 Meeting Room</h1>
+      <p>Kelola jadwal dan penggunaan ruang meeting.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>🏢 Meeting Room</h3>
+    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
+    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
+  </div>
+</section>
+
+
+<section id="pantry" class="page">
+  <div class="header">
+    <div>
+      <h1>☕ Konsumsi & Pantry</h1>
+      <p>Kelola konsumsi dan kebutuhan pantry.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>☕ Konsumsi & Pantry</h3>
+    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
+    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
+  </div>
+</section>
+
+
+<section id="cleaning" class="page">
+  <div class="header">
+    <div>
+      <h1>🧹 Kebersihan</h1>
+      <p>Kelola kebutuhan dan kegiatan kebersihan.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>🧹 Kebersihan</h3>
+    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
+    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
+  </div>
+</section>
+
+
+<section id="reports" class="page">
+  <div class="header">
+    <div>
+      <h1>📊 Laporan</h1>
+      <p>Lihat dan kelola laporan General Affair.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>📊 Laporan</h3>
+    <p>Modul ini sudah aktif dan dapat diakses dari menu sebelah kiri.</p>
+    <p>Silakan lanjutkan pengisian data pada modul ini.</p>
+  </div>
 </section>
 
 </main>
@@ -1080,18 +1379,27 @@ location.reload();
 /* ================= PAGE ================= */
 
 function showPage(page,element){
-    const target=document.getElementById(page);
+    const target = document.getElementById(page);
+
     if(!target){
         console.error("Halaman tidak ditemukan:", page);
-        alert("Halaman Pengadaan belum tersedia pada HTML.");
-        return;
+        alert("Modul " + page + " belum tersedia.");
+        return false;
     }
 
-    document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(function(x){
+        x.classList.remove("active");
+    });
+
     target.classList.add("active");
 
-    document.querySelectorAll(".menu").forEach(x=>x.classList.remove("active"));
-    if(element) element.classList.add("active");
+    document.querySelectorAll(".menu").forEach(function(x){
+        x.classList.remove("active");
+    });
+
+    if(element){
+        element.classList.add("active");
+    }
 
     if(page==="inventory" && typeof loadInventory==="function"){
         loadInventory();
@@ -1100,6 +1408,12 @@ function showPage(page,element){
     if(page==="procurement" && typeof loadProcurements==="function"){
         loadProcurements();
     }
+
+    if(page==="maintenance" && typeof loadMaintenance==="function"){
+        loadMaintenance();
+    }
+
+    return false;
 }
 if(page==="procurement"){
 loadProcurements();
@@ -1686,6 +2000,251 @@ function loadProcurements(){
             <td><div class="proc-action">${actions}</div></td>
         </tr>`;
     }).join("");
+}
+
+
+/* ================= PEMELIHARAAN ================= */
+const MAINT_KEY = "ga_maintenance_data";
+const VENDOR_KEY = "ga_vendor_data";
+let editingMaintId = null;
+
+function getMaintenance(){
+    try{return JSON.parse(localStorage.getItem(MAINT_KEY)||"[]");}
+    catch(e){return [];}
+}
+function saveMaintenanceData(data){localStorage.setItem(MAINT_KEY,JSON.stringify(data));}
+function getVendors(){
+    try{return JSON.parse(localStorage.getItem(VENDOR_KEY)||"[]");}
+    catch(e){return [];}
+}
+function saveVendors(data){localStorage.setItem(VENDOR_KEY,JSON.stringify(data));}
+
+function generateMaintNo(){
+    const d=new Date();
+    const ym=d.getFullYear()+String(d.getMonth()+1).padStart(2,"0");
+    const data=getMaintenance();
+    return "PM-"+ym+"-"+String(data.length+1).padStart(4,"0");
+}
+
+function maintStatusClass(s){
+    if(s==="Menunggu") return "maint-waiting";
+    if(s==="Disetujui") return "maint-approved";
+    if(s==="Dikerjakan") return "maint-working";
+    return "maint-done";
+}
+
+function openMaintenanceModal(id=null){
+    editingMaintId=id;
+    loadVendorSelect();
+
+    document.getElementById("maintenanceModal").style.display="flex";
+
+    if(id){
+        const x=getMaintenance().find(a=>a.id===id);
+        if(!x)return;
+        document.getElementById("maintModalTitle").innerText="Edit Pemeliharaan";
+        document.getElementById("maintNo").value=x.no||"";
+        document.getElementById("maintDate").value=x.date||"";
+        document.getElementById("maintAsset").value=x.asset||"";
+        document.getElementById("maintType").value=x.type||"Service";
+        document.getElementById("maintProblem").value=x.problem||"";
+        document.getElementById("maintVendor").value=x.vendor||"";
+        document.getElementById("maintEstimate").value=x.estimate||0;
+        document.getElementById("maintActual").value=x.actual||0;
+        document.getElementById("maintDoneDate").value=x.doneDate||"";
+        document.getElementById("maintStatus").value=x.status||"Menunggu";
+        document.getElementById("maintNotes").value=x.notes||"";
+    }else{
+        document.getElementById("maintModalTitle").innerText="Tambah Pemeliharaan";
+        document.getElementById("maintNo").value=generateMaintNo();
+        document.getElementById("maintDate").value=new Date().toISOString().slice(0,10);
+        document.getElementById("maintAsset").value="";
+        document.getElementById("maintType").value="Service";
+        document.getElementById("maintProblem").value="";
+        document.getElementById("maintVendor").value="";
+        document.getElementById("maintEstimate").value=0;
+        document.getElementById("maintActual").value=0;
+        document.getElementById("maintDoneDate").value="";
+        document.getElementById("maintStatus").value="Menunggu";
+        document.getElementById("maintNotes").value="";
+    }
+}
+
+function closeMaintenanceModal(){
+    document.getElementById("maintenanceModal").style.display="none";
+    editingMaintId=null;
+}
+
+function saveMaintenance(){
+    const asset=document.getElementById("maintAsset").value.trim();
+    const problem=document.getElementById("maintProblem").value.trim();
+
+    if(!asset||!problem){
+        alert("Asset/Kendaraan dan Keluhan/Kerusakan wajib diisi.");
+        return;
+    }
+
+    const data=getMaintenance();
+    const record={
+        id:editingMaintId||Date.now(),
+        no:document.getElementById("maintNo").value,
+        date:document.getElementById("maintDate").value,
+        asset,
+        type:document.getElementById("maintType").value,
+        problem,
+        vendor:document.getElementById("maintVendor").value,
+        estimate:Number(document.getElementById("maintEstimate").value||0),
+        actual:Number(document.getElementById("maintActual").value||0),
+        doneDate:document.getElementById("maintDoneDate").value,
+        status:document.getElementById("maintStatus").value,
+        notes:document.getElementById("maintNotes").value.trim()
+    };
+
+    const idx=data.findIndex(x=>x.id===record.id);
+    if(idx>=0)data[idx]=record;else data.unshift(record);
+    saveMaintenanceData(data);
+    closeMaintenanceModal();
+    loadMaintenance();
+    alert("Data pemeliharaan berhasil disimpan.");
+}
+
+function updateMaintenanceStatus(id,status){
+    const data=getMaintenance();
+    const x=data.find(a=>a.id===id);
+    if(!x)return;
+    x.status=status;
+    if(status==="Selesai"&&!x.doneDate)x.doneDate=new Date().toISOString().slice(0,10);
+    saveMaintenanceData(data);
+    loadMaintenance();
+}
+
+function deleteMaintenance(id){
+    if(!confirm("Yakin ingin menghapus data pemeliharaan ini?"))return;
+    saveMaintenanceData(getMaintenance().filter(x=>x.id!==id));
+    loadMaintenance();
+}
+
+function loadMaintenance(){
+    const search=(document.getElementById("maintSearch")?.value||"").toLowerCase().trim();
+    const filter=document.getElementById("maintStatusFilter")?.value||"";
+    let data=getMaintenance();
+
+    if(search){
+        data=data.filter(x=>
+            (x.no||"").toLowerCase().includes(search)||
+            (x.asset||"").toLowerCase().includes(search)||
+            (x.problem||"").toLowerCase().includes(search)||
+            (x.vendor||"").toLowerCase().includes(search)
+        );
+    }
+    if(filter)data=data.filter(x=>x.status===filter);
+
+    const all=getMaintenance();
+    document.getElementById("maintTotal").innerText=all.length;
+    document.getElementById("maintWaiting").innerText=all.filter(x=>x.status==="Menunggu").length;
+    document.getElementById("maintWorking").innerText=all.filter(x=>x.status==="Dikerjakan").length;
+    document.getElementById("maintDone").innerText=all.filter(x=>x.status==="Selesai").length;
+
+    const table=document.getElementById("maintenanceTable");
+    if(!data.length){
+        table.innerHTML='<tr><td colspan="9">Belum ada data pemeliharaan.</td></tr>';
+        return;
+    }
+
+    table.innerHTML=data.map(x=>{
+        let next="";
+        if(x.status==="Menunggu")next=`<button class="maint-next" onclick="updateMaintenanceStatus(${x.id},'Disetujui')">Setujui</button>`;
+        else if(x.status==="Disetujui")next=`<button class="maint-next" onclick="updateMaintenanceStatus(${x.id},'Dikerjakan')">Kerjakan</button>`;
+        else if(x.status==="Dikerjakan")next=`<button class="maint-next" onclick="updateMaintenanceStatus(${x.id},'Selesai')">Selesai</button>`;
+
+        return `<tr>
+            <td><b>${escapeHtml(x.no)}</b></td>
+            <td>${escapeHtml(x.date||"-")}</td>
+            <td>${escapeHtml(x.asset)}</td>
+            <td>${escapeHtml(x.type)}</td>
+            <td>${escapeHtml(x.problem)}</td>
+            <td>${escapeHtml(x.vendor||"-")}</td>
+            <td>Rp ${Number(x.actual||x.estimate||0).toLocaleString("id-ID")}</td>
+            <td><span class="maint-status ${maintStatusClass(x.status)}">${escapeHtml(x.status)}</span></td>
+            <td><div class="maint-actions">
+                <button class="maint-edit" onclick="openMaintenanceModal(${x.id})">✏️</button>
+                ${next}
+                <button class="maint-delete" onclick="deleteMaintenance(${x.id})">🗑️</button>
+            </div></td>
+        </tr>`;
+    }).join("");
+}
+
+/* ================= MASTER VENDOR ================= */
+function openVendorModal(){
+    document.getElementById("vendorModal").style.display="flex";
+    clearVendorForm();
+    loadVendors();
+}
+function closeVendorModal(){
+    document.getElementById("vendorModal").style.display="none";
+}
+function clearVendorForm(){
+    ["vendorCode","vendorName","vendorCategory","vendorPic","vendorPhone","vendorNpwp","vendorAddress","vendorAccount"].forEach(id=>{
+        document.getElementById(id).value="";
+    });
+    document.getElementById("vendorStatus").value="Aktif";
+}
+function saveVendor(){
+    const code=document.getElementById("vendorCode").value.trim();
+    const name=document.getElementById("vendorName").value.trim();
+    if(!code||!name){
+        alert("Kode Vendor dan Nama Vendor wajib diisi.");
+        return;
+    }
+    const data=getVendors();
+    const existing=data.findIndex(x=>x.code===code);
+    const vendor={
+        id:existing>=0?data[existing].id:Date.now(),
+        code,name,
+        category:document.getElementById("vendorCategory").value.trim(),
+        pic:document.getElementById("vendorPic").value.trim(),
+        phone:document.getElementById("vendorPhone").value.trim(),
+        npwp:document.getElementById("vendorNpwp").value.trim(),
+        address:document.getElementById("vendorAddress").value.trim(),
+        status:document.getElementById("vendorStatus").value,
+        account:document.getElementById("vendorAccount").value.trim()
+    };
+    if(existing>=0)data[existing]=vendor;else data.push(vendor);
+    saveVendors(data);
+    loadVendors();
+    loadVendorSelect();
+    clearVendorForm();
+    alert("Vendor berhasil disimpan.");
+}
+function loadVendors(){
+    const table=document.getElementById("vendorTable");
+    if(!table)return;
+    const data=getVendors();
+    table.innerHTML=data.length?data.map(x=>`<tr>
+        <td>${escapeHtml(x.code)}</td>
+        <td><b>${escapeHtml(x.name)}</b></td>
+        <td>${escapeHtml(x.category||"-")}</td>
+        <td>${escapeHtml(x.pic||"-")}</td>
+        <td>${escapeHtml(x.phone||"-")}</td>
+        <td>${escapeHtml(x.status)}</td>
+        <td><button class="action-delete" onclick="deleteVendor(${x.id})">🗑️</button></td>
+    </tr>`).join(""):'<tr><td colspan="7">Belum ada vendor.</td></tr>';
+}
+function deleteVendor(id){
+    if(!confirm("Hapus vendor ini?"))return;
+    saveVendors(getVendors().filter(x=>x.id!==id));
+    loadVendors();
+    loadVendorSelect();
+}
+function loadVendorSelect(){
+    const select=document.getElementById("maintVendor");
+    if(!select)return;
+    const current=select.value;
+    const data=getVendors().filter(x=>x.status==="Aktif");
+    select.innerHTML='<option value="">Pilih Vendor / Teknisi</option>'+
+        data.map(x=>`<option value="${escapeHtml(x.name)}">${escapeHtml(x.name)}${x.category?" - "+escapeHtml(x.category):""}</option>`).join("");
+    if(current)select.value=current;
 }
 
 /* ================= SESSION ================= */
