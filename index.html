@@ -347,6 +347,122 @@ th{
         display:block;
     }
 }
+
+/* ================= PENGADAAN ================= */
+.procurement-toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+}
+.procurement-filters{
+    display:flex;
+    gap:10px;
+    flex:1;
+    min-width:280px;
+}
+.procurement-filters input,
+.procurement-filters select{
+    padding:11px 12px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    background:white;
+}
+.procurement-filters input{flex:1}
+.procurement-card{
+    background:white;
+    border-radius:14px;
+    padding:18px;
+    box-shadow:0 4px 18px #0000000d;
+    overflow-x:auto;
+}
+.proc-status{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:bold;
+}
+.proc-draft{background:#eef2f7;color:#667085}
+.proc-waiting{background:#fff3cd;color:#856404}
+.proc-approved{background:#d1e7dd;color:#0f5132}
+.proc-rejected{background:#f8d7da;color:#842029}
+.proc-ordered{background:#cfe2ff;color:#084298}
+.proc-received{background:#d1e7dd;color:#0f5132}
+.proc-action{
+    display:flex;
+    gap:5px;
+    flex-wrap:wrap;
+}
+.proc-action button{
+    padding:7px 9px;
+    border-radius:6px;
+    font-size:12px;
+}
+.btn-view{background:#e7f1ff;color:#1769e8}
+.btn-approve{background:#198754;color:white}
+.btn-reject{background:#dc3545;color:white}
+.btn-order{background:#1769e8;color:white}
+.btn-receive{background:#6f42c1;color:white}
+.btn-delete{background:#dc3545;color:white}
+.proc-summary{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-bottom:18px;
+}
+.proc-summary .card{padding:18px}
+.proc-number{font-size:26px;font-weight:bold;color:#1769e8;margin-top:6px}
+.modal-wide .modal-box{width:760px}
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+.form-grid .full{grid-column:1/-1}
+.item-row{
+    display:grid;
+    grid-template-columns:2fr 100px 130px 40px;
+    gap:8px;
+    margin-bottom:8px;
+}
+.item-row input,.item-row select{
+    width:100%;
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:7px;
+}
+.add-line{
+    background:#eaf2ff;
+    color:#1769e8;
+    padding:9px 12px;
+    border-radius:7px;
+}
+.remove-line{
+    background:#dc3545;
+    color:white;
+    border-radius:7px;
+}
+.total-box{
+    text-align:right;
+    font-size:18px;
+    font-weight:bold;
+    margin-top:12px;
+}
+@media(max-width:900px){
+    .proc-summary{grid-template-columns:repeat(2,1fr)}
+    .form-grid{grid-template-columns:1fr}
+    .form-grid .full{grid-column:auto}
+}
+@media(max-width:650px){
+    .proc-summary{grid-template-columns:1fr}
+    .procurement-filters{display:block}
+    .procurement-filters input,.procurement-filters select{width:100%;margin-bottom:8px}
+    .item-row{grid-template-columns:1fr 80px 110px 35px}
+}
+
 </style>
 </head>
 
@@ -624,10 +740,112 @@ Memuat data...
 
 </section>
 
+
+<!-- ================= PENGADAAN ================= -->
+<section id="procurement" class="page">
+    <div class="header">
+        <div>
+            <h1>🛒 Pengadaan Barang</h1>
+            <p>Kelola permintaan, persetujuan, pembelian, dan penerimaan barang.</p>
+        </div>
+        <button class="btn-primary" onclick="openProcurementModal()">➕ Buat Pengadaan</button>
+    </div>
+
+    <div class="proc-summary">
+        <div class="card">📋 Total Pengadaan<span class="proc-number" id="procTotal">0</span></div>
+        <div class="card">⏳ Menunggu Approval<span class="proc-number" id="procWaiting">0</span></div>
+        <div class="card">🛒 Sedang Dipesan<span class="proc-number" id="procOrdered">0</span></div>
+        <div class="card">📦 Sudah Diterima<span class="proc-number" id="procReceived">0</span></div>
+    </div>
+
+    <div class="procurement-card">
+        <div class="procurement-toolbar">
+            <div class="procurement-filters">
+                <input id="procSearch" placeholder="🔍 Cari nomor pengadaan, pemohon, atau barang..." oninput="loadProcurements()">
+                <select id="procStatusFilter" onchange="loadProcurements()">
+                    <option value="">Semua Status</option>
+                    <option>Draft</option>
+                    <option>Menunggu Approval</option>
+                    <option>Disetujui</option>
+                    <option>Ditolak</option>
+                    <option>Dipesan</option>
+                    <option>Diterima</option>
+                </select>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>No. Pengadaan</th>
+                    <th>Tanggal</th>
+                    <th>Pemohon</th>
+                    <th>Keperluan</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="procurementTable"></tbody>
+        </table>
+    </div>
+</section>
+
 </main>
 
 </div>
 
+
+
+<!-- ================= MODAL PENGADAAN ================= -->
+<div class="modal modal-wide" id="procurementModal">
+    <div class="modal-box">
+        <h2 id="procModalTitle">Buat Pengadaan Barang</h2>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>No. Pengadaan</label>
+                <input id="procNo" readonly>
+            </div>
+            <div class="form-group">
+                <label>Tanggal Pengajuan</label>
+                <input id="procDate" type="date">
+            </div>
+            <div class="form-group">
+                <label>Nama Pemohon</label>
+                <input id="procRequester" placeholder="Nama pemohon">
+            </div>
+            <div class="form-group">
+                <label>Departemen / Bagian</label>
+                <input id="procDepartment" placeholder="Contoh: General Affair">
+            </div>
+            <div class="form-group full">
+                <label>Keperluan / Alasan Pengadaan</label>
+                <input id="procPurpose" placeholder="Contoh: Stok ATK kantor menipis">
+            </div>
+            <div class="form-group full">
+                <label>Vendor / Supplier (opsional)</label>
+                <input id="procVendor" placeholder="Nama vendor">
+            </div>
+        </div>
+
+        <h3>Daftar Barang</h3>
+        <div id="procItems"></div>
+        <button class="add-line" onclick="addProcItem()">➕ Tambah Barang</button>
+
+        <div class="total-box">Total Estimasi: Rp <span id="procGrandTotal">0</span></div>
+
+        <div class="form-group" style="margin-top:14px">
+            <label>Catatan</label>
+            <input id="procNotes" placeholder="Catatan tambahan">
+        </div>
+
+        <div class="modal-actions">
+            <button class="cancel-btn" onclick="closeProcurementModal()">Batal</button>
+            <button class="save-btn" onclick="saveProcurement()">Simpan Pengadaan</button>
+        </div>
+    </div>
+</div>
 
 <!-- ================= MODAL ================= -->
 
@@ -879,6 +1097,9 @@ element.classList.add("active");
 
 if(page==="inventory"){
 loadInventory();
+}
+if(page==="procurement"){
+loadProcurements();
 }
 
 }
@@ -1257,6 +1478,212 @@ loadInventory();
 
 }
 
+
+
+/* ================= PENGADAAN BARANG ================= */
+let editingProcId = null;
+const PROC_KEY = "ga_procurement_data";
+
+function getProcurements(){
+    try { return JSON.parse(localStorage.getItem(PROC_KEY) || "[]"); }
+    catch(e){ return []; }
+}
+
+function saveProcurements(data){
+    localStorage.setItem(PROC_KEY, JSON.stringify(data));
+}
+
+function formatRupiah(n){
+    return Number(n||0).toLocaleString("id-ID");
+}
+
+function procStatusClass(status){
+    return {
+        "Draft":"proc-draft",
+        "Menunggu Approval":"proc-waiting",
+        "Disetujui":"proc-approved",
+        "Ditolak":"proc-rejected",
+        "Dipesan":"proc-ordered",
+        "Diterima":"proc-received"
+    }[status] || "proc-draft";
+}
+
+function generateProcNo(){
+    const now = new Date();
+    const ym = now.getFullYear().toString() + String(now.getMonth()+1).padStart(2,"0");
+    const data = getProcurements();
+    const seq = data.filter(x => (x.no||"").includes("PB-"+ym)).length + 1;
+    return "PB-"+ym+"-"+String(seq).padStart(4,"0");
+}
+
+function openProcurementModal(id=null){
+    editingProcId = id;
+    document.getElementById("procurementModal").style.display="flex";
+
+    if(id){
+        const data = getProcurements().find(x=>x.id===id);
+        if(!data) return;
+        document.getElementById("procModalTitle").innerText="Edit Pengadaan";
+        document.getElementById("procNo").value=data.no;
+        document.getElementById("procDate").value=data.date;
+        document.getElementById("procRequester").value=data.requester||"";
+        document.getElementById("procDepartment").value=data.department||"";
+        document.getElementById("procPurpose").value=data.purpose||"";
+        document.getElementById("procVendor").value=data.vendor||"";
+        document.getElementById("procNotes").value=data.notes||"";
+        document.getElementById("procItems").innerHTML="";
+        (data.items||[]).forEach(item=>addProcItem(item));
+    }else{
+        document.getElementById("procModalTitle").innerText="Buat Pengadaan Barang";
+        document.getElementById("procNo").value=generateProcNo();
+        document.getElementById("procDate").value=new Date().toISOString().slice(0,10);
+        document.getElementById("procRequester").value="";
+        document.getElementById("procDepartment").value="";
+        document.getElementById("procPurpose").value="";
+        document.getElementById("procVendor").value="";
+        document.getElementById("procNotes").value="";
+        document.getElementById("procItems").innerHTML="";
+        addProcItem();
+    }
+    updateProcTotal();
+}
+
+function closeProcurementModal(){
+    document.getElementById("procurementModal").style.display="none";
+    editingProcId=null;
+}
+
+function addProcItem(item={}){
+    const wrap=document.createElement("div");
+    wrap.className="item-row";
+    wrap.innerHTML=`
+        <input class="p-name" placeholder="Nama barang" value="${escapeHtml(item.name||"")}">
+        <input class="p-qty" type="number" min="1" value="${item.qty||1}" oninput="updateProcTotal()">
+        <input class="p-price" type="number" min="0" value="${item.price||0}" placeholder="Harga" oninput="updateProcTotal()">
+        <button class="remove-line" onclick="this.parentElement.remove();updateProcTotal()">×</button>
+    `;
+    document.getElementById("procItems").appendChild(wrap);
+    updateProcTotal();
+}
+
+function collectProcItems(){
+    return [...document.querySelectorAll("#procItems .item-row")].map(row=>({
+        name: row.querySelector(".p-name").value.trim(),
+        qty: Number(row.querySelector(".p-qty").value||0),
+        price: Number(row.querySelector(".p-price").value||0)
+    })).filter(x=>x.name);
+}
+
+function updateProcTotal(){
+    const items=collectProcItems();
+    const total=items.reduce((sum,x)=>sum+(x.qty*x.price),0);
+    document.getElementById("procGrandTotal").innerText=formatRupiah(total);
+}
+
+function saveProcurement(){
+    const requester=document.getElementById("procRequester").value.trim();
+    const purpose=document.getElementById("procPurpose").value.trim();
+    const items=collectProcItems();
+
+    if(!requester || !purpose || items.length===0){
+        alert("Pemohon, keperluan, dan minimal 1 barang wajib diisi.");
+        return;
+    }
+
+    const data=getProcurements();
+    const total=items.reduce((s,x)=>s+x.qty*x.price,0);
+    const record={
+        id: editingProcId || Date.now(),
+        no: document.getElementById("procNo").value,
+        date: document.getElementById("procDate").value,
+        requester,
+        department: document.getElementById("procDepartment").value.trim(),
+        purpose,
+        vendor: document.getElementById("procVendor").value.trim(),
+        items,
+        total,
+        notes: document.getElementById("procNotes").value.trim(),
+        status: editingProcId ? (data.find(x=>x.id===editingProcId)?.status || "Draft") : "Menunggu Approval",
+        updatedAt: new Date().toISOString()
+    };
+
+    const idx=data.findIndex(x=>x.id===record.id);
+    if(idx>=0) data[idx]=record; else data.unshift(record);
+    saveProcurements(data);
+    closeProcurementModal();
+    loadProcurements();
+    alert("Pengadaan berhasil disimpan.");
+}
+
+function updateProcStatus(id,status){
+    const data=getProcurements();
+    const item=data.find(x=>x.id===id);
+    if(!item) return;
+    item.status=status;
+    item.updatedAt=new Date().toISOString();
+    saveProcurements(data);
+    loadProcurements();
+}
+
+function deleteProcurement(id){
+    if(!confirm("Yakin ingin menghapus pengadaan ini?")) return;
+    saveProcurements(getProcurements().filter(x=>x.id!==id));
+    loadProcurements();
+}
+
+function loadProcurements(){
+    const search=(document.getElementById("procSearch")?.value||"").toLowerCase().trim();
+    const filter=document.getElementById("procStatusFilter")?.value||"";
+    let data=getProcurements();
+
+    if(search){
+        data=data.filter(x=>
+            (x.no||"").toLowerCase().includes(search) ||
+            (x.requester||"").toLowerCase().includes(search) ||
+            (x.purpose||"").toLowerCase().includes(search) ||
+            (x.items||[]).some(i=>(i.name||"").toLowerCase().includes(search))
+        );
+    }
+    if(filter) data=data.filter(x=>x.status===filter);
+
+    const all=getProcurements();
+    document.getElementById("procTotal").innerText=all.length;
+    document.getElementById("procWaiting").innerText=all.filter(x=>x.status==="Menunggu Approval").length;
+    document.getElementById("procOrdered").innerText=all.filter(x=>x.status==="Dipesan").length;
+    document.getElementById("procReceived").innerText=all.filter(x=>x.status==="Diterima").length;
+
+    const table=document.getElementById("procurementTable");
+    if(!data.length){
+        table.innerHTML=`<tr><td colspan="7">Belum ada data pengadaan.</td></tr>`;
+        return;
+    }
+
+    table.innerHTML=data.map(x=>{
+        const itemNames=(x.items||[]).map(i=>i.name).join(", ");
+        let actions=`<button class="btn-view" onclick="openProcurementModal(${x.id})">✏️ Edit</button>`;
+        if(x.status==="Menunggu Approval"){
+            actions+=`<button class="btn-approve" onclick="updateProcStatus(${x.id},'Disetujui')">✓ Setujui</button>`;
+            actions+=`<button class="btn-reject" onclick="updateProcStatus(${x.id},'Ditolak')">✕ Tolak</button>`;
+        }
+        if(x.status==="Disetujui"){
+            actions+=`<button class="btn-order" onclick="updateProcStatus(${x.id},'Dipesan')">🛒 Pesan</button>`;
+        }
+        if(x.status==="Dipesan"){
+            actions+=`<button class="btn-receive" onclick="updateProcStatus(${x.id},'Diterima')">📦 Terima</button>`;
+        }
+        actions+=`<button class="btn-delete" onclick="deleteProcurement(${x.id})">🗑️</button>`;
+
+        return `<tr>
+            <td><b>${escapeHtml(x.no)}</b></td>
+            <td>${escapeHtml(x.date||"-")}</td>
+            <td>${escapeHtml(x.requester)}</td>
+            <td title="${escapeHtml(itemNames)}">${escapeHtml(x.purpose)}</td>
+            <td>Rp ${formatRupiah(x.total)}</td>
+            <td><span class="proc-status ${procStatusClass(x.status)}">${escapeHtml(x.status)}</span></td>
+            <td><div class="proc-action">${actions}</div></td>
+        </tr>`;
+    }).join("");
+}
 
 /* ================= SESSION ================= */
 
