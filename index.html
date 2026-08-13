@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>General Affair - Admin</title>
+<title>General Affair</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -14,6 +14,16 @@ body{
     margin:0;
     font-family:Arial,sans-serif;
     background:#f4f7fb;
+    color:#172033;
+}
+
+button,input,select{
+    font-family:inherit;
+}
+
+button{
+    cursor:pointer;
+    border:0;
 }
 
 /* LOGIN */
@@ -26,8 +36,8 @@ body{
 }
 
 .login-box{
-    width:380px;
-    max-width:90%;
+    width:390px;
+    max-width:92%;
     background:white;
     padding:35px;
     border-radius:18px;
@@ -41,7 +51,6 @@ body{
 
 .login-box h1{
     margin:10px 0 5px;
-    color:#123;
 }
 
 .company{
@@ -50,32 +59,22 @@ body{
     margin-bottom:25px;
 }
 
-input{
+.login-box input{
     width:100%;
     padding:14px;
     margin:7px 0;
     border:1px solid #ddd;
     border-radius:9px;
-    font-size:15px;
-}
-
-button{
-    border:0;
-    border-radius:9px;
-    padding:13px 18px;
-    cursor:pointer;
 }
 
 .login-btn{
     width:100%;
+    padding:14px;
+    margin-top:10px;
     background:#1769e8;
     color:white;
+    border-radius:9px;
     font-size:16px;
-    margin-top:10px;
-}
-
-.login-btn:hover{
-    background:#0d57c7;
 }
 
 #error{
@@ -91,16 +90,19 @@ button{
 
 .sidebar{
     position:fixed;
-    width:240px;
+    left:0;
+    top:0;
+    width:245px;
     height:100vh;
     background:#062b55;
     color:white;
     padding:22px 15px;
+    overflow-y:auto;
 }
 
 .sidebar h2{
     font-size:17px;
-    margin-bottom:25px;
+    margin:5px 5px 25px;
 }
 
 .menu{
@@ -117,13 +119,15 @@ button{
 
 .logout{
     width:100%;
+    padding:12px;
+    margin-top:25px;
     background:#dc3545;
     color:white;
-    margin-top:25px;
+    border-radius:8px;
 }
 
 .content{
-    margin-left:240px;
+    margin-left:245px;
     padding:30px;
 }
 
@@ -136,13 +140,21 @@ button{
 
 .header h1{
     margin:0;
-    color:#123;
 }
 
 .header p{
     color:#777;
 }
 
+.page{
+    display:none;
+}
+
+.page.active{
+    display:block;
+}
+
+/* CARDS */
 .cards{
     display:grid;
     grid-template-columns:repeat(4,1fr);
@@ -156,33 +168,150 @@ button{
     box-shadow:0 4px 18px #0000000d;
 }
 
-.card-number{
+.number{
     display:block;
     font-size:30px;
     font-weight:bold;
-    margin-top:10px;
     color:#1769e8;
+    margin-top:8px;
 }
 
-.grid{
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:18px;
-    margin-top:18px;
+/* INVENTARIS */
+.inventory-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
 }
 
-.quick{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
+.btn-primary{
+    background:#1769e8;
+    color:white;
+    padding:12px 18px;
+    border-radius:8px;
+}
+
+.search{
+    width:100%;
+    padding:13px;
+    border:1px solid #ddd;
+    border-radius:9px;
+    margin-bottom:15px;
+}
+
+.table-box{
+    background:white;
+    border-radius:14px;
+    padding:18px;
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:850px;
+}
+
+th,td{
+    padding:13px;
+    border-bottom:1px solid #eee;
+    text-align:left;
+}
+
+th{
+    background:#f5f7fa;
+}
+
+.status-ok{
+    color:#198754;
+    font-weight:bold;
+}
+
+.status-low{
+    color:#dc3545;
+    font-weight:bold;
+}
+
+.action-edit{
+    background:#ffc107;
+    padding:7px 10px;
+    border-radius:6px;
+}
+
+.action-delete{
+    background:#dc3545;
+    color:white;
+    padding:7px 10px;
+    border-radius:6px;
+}
+
+/* MODAL */
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#0007;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+}
+
+.modal-box{
+    width:500px;
+    max-width:92%;
+    max-height:90vh;
+    overflow-y:auto;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+}
+
+.modal-box h2{
+    margin-top:0;
+}
+
+.form-group{
+    margin-bottom:12px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:5px;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.form-group input,
+.form-group select{
+    width:100%;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:8px;
+}
+
+.modal-actions{
+    display:flex;
     gap:10px;
+    margin-top:20px;
 }
 
-.quick button{
-    background:#eef5ff;
-    color:#1769e8;
+.save-btn{
+    flex:1;
+    background:#1769e8;
+    color:white;
+    padding:12px;
+    border-radius:8px;
 }
 
-@media(max-width:800px){
+.cancel-btn{
+    flex:1;
+    background:#ddd;
+    padding:12px;
+    border-radius:8px;
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
 
     .sidebar{
         width:190px;
@@ -195,9 +324,27 @@ button{
     .cards{
         grid-template-columns:repeat(2,1fr);
     }
+}
 
-    .grid{
+@media(max-width:650px){
+
+    .sidebar{
+        position:relative;
+        width:100%;
+        height:auto;
+    }
+
+    .content{
+        margin-left:0;
+        padding:18px;
+    }
+
+    .cards{
         grid-template-columns:1fr;
+    }
+
+    .header{
+        display:block;
     }
 }
 </style>
@@ -205,168 +352,412 @@ button{
 
 <body>
 
-<!-- LOGIN -->
+
+<!-- ================= LOGIN ================= -->
+
 <div id="loginPage">
 
-    <div class="login-box">
+<div class="login-box">
 
-        <div class="logo">🏢</div>
+<div class="logo">🏢</div>
 
-        <h1>GENERAL AFFAIR</h1>
+<h1>GENERAL AFFAIR</h1>
 
-        <div class="company">
-            PT. PERMATA INDAH MULIA PUTRA PERSADA
-        </div>
+<div class="company">
+PT. PERMATA INDAH MULIA PUTRA PERSADA
+</div>
 
-        <input
-            type="email"
-            id="email"
-            placeholder="Email Admin"
-        >
+<input
+id="email"
+type="email"
+placeholder="Email Admin">
 
-        <input
-            type="password"
-            id="password"
-            placeholder="Password"
-        >
+<input
+id="password"
+type="password"
+placeholder="Password">
 
-        <button class="login-btn" onclick="login()">
-            LOGIN ADMIN
-        </button>
+<button
+class="login-btn"
+onclick="login()">
+LOGIN ADMIN
+</button>
 
-        <div id="error"></div>
+<div id="error"></div>
 
-    </div>
+</div>
 
 </div>
 
 
-<!-- DASHBOARD -->
+<!-- ================= DASHBOARD ================= -->
+
 <div id="dashboard">
 
-    <aside class="sidebar">
+<aside class="sidebar">
 
-        <h2>🏢 GENERAL AFFAIR</h2>
+<h2>🏢 GENERAL AFFAIR</h2>
 
-        <div class="menu active">🏠 Dashboard</div>
-        <div class="menu">📦 Inventaris & ATK</div>
-        <div class="menu">🛒 Pengadaan</div>
-        <div class="menu">🔧 Pemeliharaan</div>
-        <div class="menu">🚗 Transportasi</div>
-        <div class="menu">📄 Surat & Dokumen</div>
-        <div class="menu">🏢 Meeting Room</div>
-        <div class="menu">☕ Konsumsi & Pantry</div>
-        <div class="menu">🧹 Kebersihan</div>
-        <div class="menu">📊 Laporan</div>
+<div
+class="menu active"
+onclick="showPage('home',this)">
+🏠 Dashboard
+</div>
 
-        <button class="logout" onclick="logout()">
-            LOGOUT
-        </button>
+<div
+class="menu"
+onclick="showPage('inventory',this)">
+📦 Inventaris & ATK
+</div>
 
-    </aside>
+<div class="menu">🛒 Pengadaan</div>
 
+<div class="menu">🔧 Pemeliharaan</div>
 
-    <main class="content">
+<div class="menu">🚗 Transportasi</div>
 
-        <div class="header">
+<div class="menu">📄 Surat & Dokumen</div>
 
-            <div>
-                <h1>Dashboard General Affair</h1>
-                <p id="userEmail">Admin</p>
-            </div>
+<div class="menu">🏢 Meeting Room</div>
 
-            <b>👤 ADMIN GA</b>
+<div class="menu">☕ Konsumsi & Pantry</div>
 
-        </div>
+<div class="menu">🧹 Kebersihan</div>
 
+<div class="menu">📊 Laporan</div>
 
-        <div class="cards">
+<button
+class="logout"
+onclick="logout()">
+LOGOUT
+</button>
 
-            <div class="card">
-                📋 Permintaan Hari Ini
-                <span class="card-number">12</span>
-            </div>
-
-            <div class="card">
-                🛒 Pengadaan Aktif
-                <span class="card-number">8</span>
-            </div>
-
-            <div class="card">
-                🔧 Pemeliharaan
-                <span class="card-number">5</span>
-            </div>
-
-            <div class="card">
-                📦 Stok Menipis
-                <span class="card-number">7</span>
-            </div>
-
-        </div>
+</aside>
 
 
-        <div class="grid">
-
-            <div class="card">
-
-                <h3>📊 Ringkasan General Affair</h3>
-
-                <p>
-                    Permintaan menunggu:
-                    <b>12</b>
-                </p>
-
-                <p>
-                    Permintaan diproses:
-                    <b>9</b>
-                </p>
-
-                <p>
-                    Permintaan selesai:
-                    <b>24</b>
-                </p>
-
-            </div>
+<main class="content">
 
 
-            <div class="card">
+<!-- DASHBOARD HOME -->
 
-                <h3>🔔 Pengingat</h3>
+<section
+id="home"
+class="page active">
 
-                <p>⚠️ Stok ATK menipis</p>
-                <p>🔧 Maintenance AC</p>
-                <p>🚗 Pajak kendaraan</p>
+<div class="header">
 
-            </div>
+<div>
 
-        </div>
+<h1>Dashboard General Affair</h1>
+
+<p id="userEmail">
+Admin
+</p>
+
+</div>
+
+<b>👤 ADMIN GA</b>
+
+</div>
 
 
-        <div class="card" style="margin-top:18px">
+<div class="cards">
 
-            <h3>⚡ Akses Cepat</h3>
+<div class="card">
+📋 Permintaan Hari Ini
+<span class="number">12</span>
+</div>
 
-            <div class="quick">
+<div class="card">
+🛒 Pengadaan Aktif
+<span class="number">8</span>
+</div>
 
-                <button>➕<br>Buat Permintaan</button>
-                <button>📦<br>Cek Stok ATK</button>
-                <button>🏢<br>Reservasi Ruangan</button>
-                <button>🔧<br>Pengajuan Maintenance</button>
-                <button>🚗<br>Pengajuan Kendaraan</button>
-                <button>📊<br>Laporan GA</button>
+<div class="card">
+🔧 Pemeliharaan
+<span class="number">5</span>
+</div>
 
-            </div>
+<div class="card">
+📦 Stok Menipis
+<span
+class="number"
+id="lowStockHome">
+0
+</span>
+</div>
 
-        </div>
+</div>
 
-    </main>
+
+<div
+class="card"
+style="margin-top:20px">
+
+<h3>📊 Sistem General Affair</h3>
+
+<p>
+Gunakan menu di sebelah kiri untuk mengelola aktivitas General Affair.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- ================= INVENTARIS ================= -->
+
+<section
+id="inventory"
+class="page">
+
+<div class="inventory-header">
+
+<div>
+
+<h1>📦 Inventaris & ATK</h1>
+
+<p>Kelola stok barang General Affair</p>
+
+</div>
+
+<button
+class="btn-primary"
+onclick="openAddModal()">
+
+➕ Tambah Barang
+
+</button>
+
+</div>
+
+
+<div class="cards">
+
+<div class="card">
+
+📦 Total Jenis Barang
+
+<span
+class="number"
+id="totalItems">
+0
+</span>
+
+</div>
+
+<div class="card">
+
+⚠️ Stok Menipis
+
+<span
+class="number"
+id="lowStock">
+0
+</span>
+
+</div>
+
+</div>
+
+
+<div
+class="table-box"
+style="margin-top:20px">
+
+<input
+class="search"
+id="search"
+placeholder="🔍 Cari kode atau nama barang..."
+oninput="loadInventory()">
+
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Kode</th>
+<th>Nama Barang</th>
+<th>Kategori</th>
+<th>Satuan</th>
+<th>Stok</th>
+<th>Minimum</th>
+<th>Lokasi</th>
+<th>Status</th>
+<th>Aksi</th>
+
+</tr>
+
+</thead>
+
+<tbody id="inventoryTable">
+
+<tr>
+<td colspan="9">
+Memuat data...
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+</main>
+
+</div>
+
+
+<!-- ================= MODAL ================= -->
+
+<div
+class="modal"
+id="itemModal">
+
+<div class="modal-box">
+
+<h2 id="modalTitle">
+Tambah Barang
+</h2>
+
+
+<div class="form-group">
+
+<label>Kode Barang</label>
+
+<input
+id="kode_barang"
+placeholder="Contoh: ATK-001">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Nama Barang</label>
+
+<input
+id="nama_barang"
+placeholder="Contoh: Pulpen">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Kategori</label>
+
+<select id="kategori">
+
+<option value="">Pilih kategori</option>
+<option>Alat Tulis</option>
+<option>Kertas</option>
+<option>Arsip</option>
+<option>Kebersihan</option>
+<option>Pantry</option>
+<option>Lainnya</option>
+
+</select>
+
+</div>
+
+
+<div class="form-group">
+
+<label>Satuan</label>
+
+<select id="satuan">
+
+<option>Pcs</option>
+<option>Box</option>
+<option>Rim</option>
+<option>Pack</option>
+<option>Botol</option>
+<option>Liter</option>
+<option>Unit</option>
+
+</select>
+
+</div>
+
+
+<div class="form-group">
+
+<label>Stok</label>
+
+<input
+id="stok"
+type="number"
+min="0"
+value="0">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Stok Minimum</label>
+
+<input
+id="stok_minimum"
+type="number"
+min="0"
+value="5">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Lokasi</label>
+
+<input
+id="lokasi"
+placeholder="Contoh: Gudang GA">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Keterangan</label>
+
+<input
+id="keterangan"
+placeholder="Keterangan barang">
+
+</div>
+
+
+<div class="modal-actions">
+
+<button
+class="cancel-btn"
+onclick="closeModal()">
+Batal
+</button>
+
+<button
+class="save-btn"
+onclick="saveItem()">
+Simpan
+</button>
+
+</div>
+
+</div>
 
 </div>
 
 
 <script>
 
-/* SUPABASE */
+/* ================= SUPABASE ================= */
 
 const SUPABASE_URL =
 "https://szstsrakcsnrcpbhjoxe.supabase.co";
@@ -376,99 +767,493 @@ const SUPABASE_KEY =
 
 const supabaseClient =
 supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
+SUPABASE_URL,
+SUPABASE_KEY
 );
 
 
-/* LOGIN */
+/* ================= LOGIN ================= */
 
 async function login(){
 
-    const email =
-        document.getElementById("email").value.trim();
+const email =
+document.getElementById("email").value.trim();
 
-    const password =
-        document.getElementById("password").value;
+const password =
+document.getElementById("password").value;
 
-    const error =
-        document.getElementById("error");
+const error =
+document.getElementById("error");
 
-    error.innerText = "";
+error.innerText="";
 
-    if(!email || !password){
+if(!email || !password){
 
-        error.innerText =
-            "Email dan password wajib diisi.";
+error.innerText =
+"Email dan password wajib diisi.";
 
-        return;
-    }
+return;
+}
 
-    const {data, error:loginError} =
-        await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
+const {data,error:loginError} =
+await supabaseClient.auth.signInWithPassword({
+email,
+password
+});
 
-    if(loginError){
+if(loginError){
 
-        error.innerText =
-            "Login gagal: " + loginError.message;
+error.innerText =
+"Login gagal: "+loginError.message;
 
-        return;
-    }
+return;
+}
 
-    showDashboard(data.user);
+showDashboard(data.user);
 
 }
 
 
-/* TAMPILKAN DASHBOARD */
+/* ================= DASHBOARD ================= */
 
 function showDashboard(user){
 
-    document.getElementById("loginPage")
-        .style.display = "none";
+document.getElementById("loginPage")
+.style.display="none";
 
-    document.getElementById("dashboard")
-        .style.display = "block";
+document.getElementById("dashboard")
+.style.display="block";
 
-    document.getElementById("userEmail")
-        .innerText = user.email;
+document.getElementById("userEmail")
+.innerText=user.email;
+
+loadInventory();
 
 }
 
 
-/* LOGOUT */
+/* ================= LOGOUT ================= */
 
 async function logout(){
 
-    await supabaseClient.auth.signOut();
+await supabaseClient.auth.signOut();
 
-    document.getElementById("dashboard")
-        .style.display = "none";
-
-    document.getElementById("loginPage")
-        .style.display = "flex";
-
-    document.getElementById("email").value = "";
-    document.getElementById("password").value = "";
+location.reload();
 
 }
 
 
-/* CEK SESSION SAAT WEBSITE DIBUKA */
+/* ================= PAGE ================= */
+
+function showPage(page,element){
+
+document
+.querySelectorAll(".page")
+.forEach(x=>x.classList.remove("active"));
+
+document
+.getElementById(page)
+.classList.add("active");
+
+document
+.querySelectorAll(".menu")
+.forEach(x=>x.classList.remove("active"));
+
+element.classList.add("active");
+
+if(page==="inventory"){
+loadInventory();
+}
+
+}
+
+
+/* ================= LOAD INVENTORY ================= */
+
+async function loadInventory(){
+
+const search =
+document.getElementById("search")?.value
+.trim()
+.toLowerCase() || "";
+
+let query =
+supabaseClient
+.from("inventaris_atk")
+.select("*")
+.order("id",{ascending:false});
+
+const {data,error} =
+await query;
+
+if(error){
+
+console.error(error);
+
+document.getElementById("inventoryTable")
+.innerHTML =
+`<tr>
+<td colspan="9">
+Gagal mengambil data inventaris.
+</td>
+</tr>`;
+
+return;
+}
+
+
+let items=data || [];
+
+
+/* SEARCH */
+
+if(search){
+
+items=items.filter(item=>
+(item.kode_barang||"")
+.toLowerCase()
+.includes(search)
+||
+(item.nama_barang||"")
+.toLowerCase()
+.includes(search)
+);
+
+}
+
+
+/* STATISTIK */
+
+document.getElementById("totalItems")
+.innerText=items.length;
+
+const low =
+items.filter(item=>
+Number(item.stok)<=Number(item.stok_minimum)
+).length;
+
+document.getElementById("lowStock")
+.innerText=low;
+
+document.getElementById("lowStockHome")
+.innerText=low;
+
+
+/* TABLE */
+
+const table =
+document.getElementById("inventoryTable");
+
+if(items.length===0){
+
+table.innerHTML=
+`<tr>
+<td colspan="9">
+Belum ada data barang.
+</td>
+</tr>`;
+
+return;
+
+}
+
+
+table.innerHTML=items.map(item=>{
+
+const isLow =
+Number(item.stok)<=Number(item.stok_minimum);
+
+return `
+
+<tr>
+
+<td>${escapeHtml(item.kode_barang)}</td>
+
+<td><b>${escapeHtml(item.nama_barang)}</b></td>
+
+<td>${escapeHtml(item.kategori||"-")}</td>
+
+<td>${escapeHtml(item.satuan||"-")}</td>
+
+<td>${item.stok}</td>
+
+<td>${item.stok_minimum}</td>
+
+<td>${escapeHtml(item.lokasi||"-")}</td>
+
+<td class="${isLow?'status-low':'status-ok'}">
+
+${isLow?'⚠️ MENIPIS':'✓ AMAN'}
+
+</td>
+
+<td>
+
+<button
+class="action-edit"
+onclick="editItem(${item.id})">
+✏️
+</button>
+
+<button
+class="action-delete"
+onclick="deleteItem(${item.id})">
+🗑️
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+}).join("");
+
+}
+
+
+/* ================= ESCAPE ================= */
+
+function escapeHtml(value){
+
+return String(value)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+/* ================= MODAL ================= */
+
+let editingId=null;
+
+
+function openAddModal(){
+
+editingId=null;
+
+document.getElementById("modalTitle")
+.innerText="Tambah Barang";
+
+clearForm();
+
+document.getElementById("itemModal")
+.style.display="flex";
+
+}
+
+
+function closeModal(){
+
+document.getElementById("itemModal")
+.style.display="none";
+
+}
+
+
+function clearForm(){
+
+document.getElementById("kode_barang").value="";
+document.getElementById("nama_barang").value="";
+document.getElementById("kategori").value="";
+document.getElementById("satuan").value="Pcs";
+document.getElementById("stok").value=0;
+document.getElementById("stok_minimum").value=5;
+document.getElementById("lokasi").value="";
+document.getElementById("keterangan").value="";
+
+}
+
+
+/* ================= SAVE ================= */
+
+async function saveItem(){
+
+const item={
+
+kode_barang:
+document.getElementById("kode_barang").value.trim(),
+
+nama_barang:
+document.getElementById("nama_barang").value.trim(),
+
+kategori:
+document.getElementById("kategori").value,
+
+satuan:
+document.getElementById("satuan").value,
+
+stok:
+Number(document.getElementById("stok").value),
+
+stok_minimum:
+Number(document.getElementById("stok_minimum").value),
+
+lokasi:
+document.getElementById("lokasi").value.trim(),
+
+keterangan:
+document.getElementById("keterangan").value.trim()
+
+};
+
+
+if(!item.kode_barang || !item.nama_barang){
+
+alert("Kode barang dan nama barang wajib diisi.");
+
+return;
+
+}
+
+
+let result;
+
+
+if(editingId){
+
+result=
+await supabaseClient
+.from("inventaris_atk")
+.update(item)
+.eq("id",editingId);
+
+}else{
+
+result=
+await supabaseClient
+.from("inventaris_atk")
+.insert(item);
+
+}
+
+
+if(result.error){
+
+alert(
+"Gagal menyimpan: "+
+result.error.message
+);
+
+return;
+
+}
+
+
+alert("Data berhasil disimpan.");
+
+closeModal();
+
+loadInventory();
+
+}
+
+
+/* ================= EDIT ================= */
+
+async function editItem(id){
+
+const {data,error} =
+await supabaseClient
+.from("inventaris_atk")
+.select("*")
+.eq("id",id)
+.single();
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+
+editingId=id;
+
+document.getElementById("modalTitle")
+.innerText="Edit Barang";
+
+document.getElementById("kode_barang")
+.value=data.kode_barang||"";
+
+document.getElementById("nama_barang")
+.value=data.nama_barang||"";
+
+document.getElementById("kategori")
+.value=data.kategori||"";
+
+document.getElementById("satuan")
+.value=data.satuan||"Pcs";
+
+document.getElementById("stok")
+.value=data.stok||0;
+
+document.getElementById("stok_minimum")
+.value=data.stok_minimum||5;
+
+document.getElementById("lokasi")
+.value=data.lokasi||"";
+
+document.getElementById("keterangan")
+.value=data.keterangan||"";
+
+document.getElementById("itemModal")
+.style.display="flex";
+
+}
+
+
+/* ================= DELETE ================= */
+
+async function deleteItem(id){
+
+if(!confirm(
+"Yakin ingin menghapus barang ini?"
+)) return;
+
+
+const {error} =
+await supabaseClient
+.from("inventaris_atk")
+.delete()
+.eq("id",id);
+
+
+if(error){
+
+alert(
+"Gagal menghapus: "+
+error.message
+);
+
+return;
+
+}
+
+
+alert("Barang berhasil dihapus.");
+
+loadInventory();
+
+}
+
+
+/* ================= SESSION ================= */
 
 async function checkSession(){
 
-    const {data} =
-        await supabaseClient.auth.getSession();
+const {data} =
+await supabaseClient.auth.getSession();
 
-    if(data.session){
+if(data.session){
 
-        showDashboard(data.session.user);
+showDashboard(data.session.user);
 
-    }
+}
 
 }
 
