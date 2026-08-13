@@ -526,7 +526,7 @@ onclick="showPage('inventory',this)">
 📦 Inventaris & ATK
 </div>
 
-<div class="menu" onclick="showPage('procurement',this)">
+<div class="menu" role="button" tabindex="0" onclick="showPage('procurement', this); return false;" onkeydown="if(event.key==='Enter'||event.key===' '){showPage('procurement', this); event.preventDefault();}">
 🛒 Pengadaan
 </div>
 
@@ -1080,23 +1080,26 @@ location.reload();
 /* ================= PAGE ================= */
 
 function showPage(page,element){
+    const target=document.getElementById(page);
+    if(!target){
+        console.error("Halaman tidak ditemukan:", page);
+        alert("Halaman Pengadaan belum tersedia pada HTML.");
+        return;
+    }
 
-document
-.querySelectorAll(".page")
-.forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+    target.classList.add("active");
 
-document
-.getElementById(page)
-.classList.add("active");
+    document.querySelectorAll(".menu").forEach(x=>x.classList.remove("active"));
+    if(element) element.classList.add("active");
 
-document
-.querySelectorAll(".menu")
-.forEach(x=>x.classList.remove("active"));
+    if(page==="inventory" && typeof loadInventory==="function"){
+        loadInventory();
+    }
 
-element.classList.add("active");
-
-if(page==="inventory"){
-loadInventory();
+    if(page==="procurement" && typeof loadProcurements==="function"){
+        loadProcurements();
+    }
 }
 if(page==="procurement"){
 loadProcurements();
