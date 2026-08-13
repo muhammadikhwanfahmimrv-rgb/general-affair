@@ -70,74 +70,20 @@ table{width:100%;border-collapse:collapse;min-width:850px}th,td{padding:11px;bor
  .print-title h2,.print-title p{margin:3px}
  .signature{display:grid!important}
 }
-.login-links{display:flex;justify-content:space-between;gap:10px;margin-top:14px;font-size:13px}.login-link{background:none;color:#1769e8;padding:4px}.login-link:hover{text-decoration:underline}.auth-modal-note{font-size:12px;color:#667085;margin:0 0 14px}.password-wrap{position:relative}.password-wrap input{padding-right:48px}.password-toggle{position:absolute;right:8px;top:7px;background:#eef2f7;border-radius:7px;padding:8px}.success-msg{color:#198754;font-size:13px;margin-top:10px}.danger-msg{color:#dc3545;font-size:13px;margin-top:10px}
-.employee-login-switch{display:flex;gap:8px;margin-bottom:10px}.employee-login-switch button{flex:1;padding:10px;border-radius:8px;background:#eef2f7;color:#172033}.employee-login-switch button.active{background:#1769e8;color:#fff}.employee-note{font-size:12px;color:#667085;margin:8px 0 14px}.employee-app{display:none;min-height:100vh;background:#f4f7fb}.employee-top{background:#062b55;color:#fff;padding:18px 25px;display:flex;justify-content:space-between;align-items:center;gap:15px}.employee-content{max-width:1100px;margin:auto;padding:25px}.employee-card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 4px 18px #0000000d;margin-bottom:18px}.employee-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.employee-grid .form-group{margin-bottom:0}.employee-table{overflow-x:auto}.employee-status{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:bold}.status-pending{background:#fff3cd;color:#856404}.status-approved{background:#d1e7dd;color:#0f5132}.status-rejected{background:#f8d7da;color:#842029}.employee-submit{background:#198754;color:#fff;padding:12px 18px;border-radius:8px}.employee-logout{background:#dc3545;color:#fff;padding:10px 15px;border-radius:8px}.employee-item-info{background:#f7f9fc;border:1px solid #e5e7eb;padding:10px;border-radius:8px;margin-top:6px;font-size:13px}@media(max-width:700px){.employee-grid{grid-template-columns:1fr}.employee-top{display:block}}
 </style>
 </head>
 <body>
 
 <div id="loginPage">
  <div class="login-box">
-  <div class="logo">🏢</div><h1>GENERAL AFFAIR</h1>
+  <div class="logo">🏢</div>
+  <h1>GENERAL AFFAIR</h1>
   <div class="company">PT. PERMATA INDAH MULIA PUTRA PERSADA</div>
-  <div class="employee-login-switch"><button id="loginAdminMode" class="active" onclick="setLoginMode('admin')">👨‍💼 ADMIN GA</button><button id="loginEmployeeMode" onclick="setLoginMode('employee')">👨‍💻 KARYAWAN</button></div>
-  <div id="loginModeText" class="employee-note">Login untuk mengelola sistem General Affair.</div>
-  <input id="email" type="email" placeholder="Email Admin"><input id="password" type="password" placeholder="Password">
-  <button class="login-btn" id="loginButton" onclick="login()">LOGIN ADMIN</button><div id="error"></div><div class="login-links"><button class="login-link" id="registerLink" onclick="openRegisterModal()">📝 Daftar Akun Karyawan</button><button class="login-link" onclick="openForgotModal()">🔑 Lupa Kata Sandi?</button></div>
+  <input id="email" type="email" placeholder="Email Admin">
+  <input id="password" type="password" placeholder="Password">
+  <button class="login-btn" onclick="login()">LOGIN ADMIN</button>
+  <div id="error"></div>
  </div>
-</div>
-
-<!-- ================= AUTH MODALS ================= -->
-<div class="modal" id="registerModal">
- <div class="modal-box" style="width:500px">
-  <h2>📝 Daftar Akun Karyawan</h2>
-  <p class="auth-modal-note">Pendaftaran ini hanya untuk akun Karyawan. Akun Admin GA dibuat oleh pengelola sistem.</p>
-  <div class="form-group"><label>Nama Lengkap</label><input id="regName" placeholder="Nama lengkap"></div>
-  <div class="form-group"><label>NIK / ID Karyawan</label><input id="regNik" placeholder="NIK / ID karyawan"></div>
-  <div class="form-group"><label>Departemen</label><input id="regDept" placeholder="Contoh: Finance"></div>
-  <div class="form-group"><label>Email</label><input id="regEmail" type="email" placeholder="nama@perusahaan.com"></div>
-  <div class="form-group"><label>Password</label><div class="password-wrap"><input id="regPassword" type="password" placeholder="Minimal 6 karakter"><button type="button" class="password-toggle" onclick="togglePassword('regPassword',this)">👁</button></div></div>
-  <div class="form-group"><label>Konfirmasi Password</label><div class="password-wrap"><input id="regPassword2" type="password" placeholder="Ulangi password"><button type="button" class="password-toggle" onclick="togglePassword('regPassword2',this)">👁</button></div></div>
-  <div id="registerMessage"></div>
-  <div class="modal-actions"><button class="cancel-btn" onclick="closeRegisterModal()">Batal</button><button class="save-btn" onclick="registerEmployee()">Daftar Akun</button></div>
- </div>
-</div>
-
-<div class="modal" id="forgotModal">
- <div class="modal-box" style="width:500px">
-  <h2>🔑 Lupa Kata Sandi</h2>
-  <p class="auth-modal-note">Masukkan email akun Anda. Kami akan mengirimkan link untuk membuat password baru.</p>
-  <div class="form-group"><label>Email</label><input id="forgotEmail" type="email" placeholder="Email akun"></div>
-  <div id="forgotMessage"></div>
-  <div class="modal-actions"><button class="cancel-btn" onclick="closeForgotModal()">Batal</button><button class="save-btn" onclick="sendResetPassword()">Kirim Link Reset</button></div>
- </div>
-</div>
-
-<div class="modal" id="resetModal">
- <div class="modal-box" style="width:500px">
-  <h2>🔐 Buat Password Baru</h2>
-  <p class="auth-modal-note">Masukkan password baru untuk akun Anda.</p>
-  <div class="form-group"><label>Password Baru</label><div class="password-wrap"><input id="newPassword" type="password" placeholder="Minimal 6 karakter"><button type="button" class="password-toggle" onclick="togglePassword('newPassword',this)">👁</button></div></div>
-  <div class="form-group"><label>Konfirmasi Password</label><div class="password-wrap"><input id="newPassword2" type="password" placeholder="Ulangi password"><button type="button" class="password-toggle" onclick="togglePassword('newPassword2',this)">👁</button></div></div>
-  <div id="resetMessage"></div>
-  <div class="modal-actions"><button class="save-btn" onclick="updateNewPassword()">Simpan Password</button></div>
- </div>
-</div>
-
-<div id="employeeDashboard" class="employee-app">
- <div class="employee-top"><div><b>🏢 GENERAL AFFAIR</b><div style="font-size:12px">Portal Pengambilan ATK Karyawan</div></div><div><span id="employeeWelcome"></span> <button class="employee-logout" onclick="logout()">LOGOUT</button></div></div>
- <main class="employee-content">
-  <div class="employee-card"><h1 style="margin-top:0">📦 Pengambilan ATK</h1><p style="color:#667085">Ajukan pengambilan ATK. Permintaan diperiksa dan disetujui Admin GA.</p>
-   <div class="employee-grid">
-    <div class="form-group"><label>Nama Karyawan</label><input id="empName" placeholder="Nama lengkap"></div><div class="form-group"><label>NIK / ID Karyawan</label><input id="empNik" placeholder="NIK / ID"></div><div class="form-group"><label>Departemen</label><input id="empDept" placeholder="Departemen / Bagian"></div>
-    <div class="form-group"><label>Barang ATK</label><select id="empItem" onchange="employeeItemInfo()"><option value="">Memuat barang...</option></select><div id="empItemInfo" class="employee-item-info">Pilih barang.</div></div><div class="form-group"><label>Jumlah</label><input id="empQty" type="number" min="1" value="1"></div><div class="form-group"><label>Tanggal Pengambilan</label><input id="empDate" type="date"></div>
-    <div class="form-group full"><label>Keperluan</label><textarea id="empPurpose" placeholder="Contoh: kebutuhan operasional kantor"></textarea></div>
-   </div><div style="margin-top:15px"><button class="employee-submit" onclick="submitAtkRequest()">📤 AJUKAN PENGAMBILAN</button></div>
-  </div>
-  <div class="employee-card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><h2 style="margin:0">📋 Riwayat Pengambilan Saya</h2><p style="color:#667085">Status permintaan ATK yang pernah diajukan.</p></div><button class="btn-primary no-print" onclick="window.print()">🖨️ CETAK A4</button></div>
-   <div class="employee-table"><table><thead><tr><th>No. Pengajuan</th><th>Tanggal</th><th>Barang</th><th>Qty</th><th>Keperluan</th><th>Status</th><th>Catatan Admin</th></tr></thead><tbody id="employeeRequestTable"></tbody></table></div>
-  </div>
- </main>
 </div>
 
 <div id="dashboard">
@@ -145,7 +91,6 @@ table{width:100%;border-collapse:collapse;min-width:850px}th,td{padding:11px;bor
  <h2>🏢 GENERAL AFFAIR</h2>
  <div class="menu active" onclick="showPage('home',this)">🏠 Dashboard</div>
  <div class="menu" onclick="showPage('inventory',this)">📦 Inventaris & ATK</div>
- <div class="menu admin-only" onclick="showPage('atkRequests',this)">📥 Pengambilan ATK</div>
  <div class="menu" onclick="showPage('procurement',this)">🛒 Pengadaan</div>
  <div class="menu" onclick="showPage('maintenance',this)">🔧 Pemeliharaan</div>
  <div class="menu" onclick="showPage('transport',this)">🚗 Transportasi</div>
@@ -186,12 +131,6 @@ table{width:100%;border-collapse:collapse;min-width:850px}th,td{padding:11px;bor
   <button class="btn-primary no-print" onclick="window.print()">🖨️ CETAK A4</button>
   <table><thead><tr><th>Kode</th><th>Nama Barang</th><th>Kategori</th><th>Satuan</th><th>Stok</th><th>Minimum</th><th>Lokasi</th><th>Status</th><th class="no-print">Aksi</th></tr></thead><tbody id="inventoryTable"></tbody></table>
  </div>
-</section>
-
-<section id="atkRequests" class="page">
- <div class="header"><div><h1>📥 Pengambilan ATK</h1><p>Kelola permintaan pengambilan ATK dari karyawan.</p></div><button class="btn-primary no-print" onclick="window.print()">🖨️ CETAK A4</button></div>
- <div class="summary"><div class="card">📋 Total<span class="number" id="atkReqTotal">0</span></div><div class="card">⏳ Menunggu<span class="number" id="atkReqWaiting">0</span></div><div class="card">✅ Disetujui<span class="number" id="atkReqApproved">0</span></div><div class="card">❌ Ditolak<span class="number" id="atkReqRejected">0</span></div></div>
- <div class="table-box"><div class="toolbar no-print"><div class="toolbar-left"><input id="atkReqSearch" placeholder="🔍 Cari karyawan, barang, departemen..." oninput="loadAtkRequests()"><select id="atkReqFilter" onchange="loadAtkRequests()"><option value="">Semua Status</option><option>Menunggu Approval</option><option>Disetujui</option><option>Ditolak</option></select></div></div><div class="print-title"><h2>PT. PERMATA INDAH MULIA PUTRA PERSADA</h2><p>REKAP PENGAMBILAN ATK</p></div><table><thead><tr><th>No.</th><th>Tanggal</th><th>Karyawan</th><th>Departemen</th><th>Barang</th><th>Qty</th><th>Keperluan</th><th>Status</th><th class="no-print">Aksi</th></tr></thead><tbody id="atkRequestTable"></tbody></table></div>
 </section>
 
 <section id="procurement" class="page">
@@ -360,52 +299,23 @@ function escapeHtml(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"
 function rupiah(n){return Number(n||0).toLocaleString("id-ID")}
 function today(){return new Date().toISOString().slice(0,10)}
 
-let loginMode="admin";let currentUser=null;
-function setLoginMode(mode){loginMode=mode;document.getElementById("loginAdminMode").classList.toggle("active",mode==="admin");document.getElementById("loginEmployeeMode").classList.toggle("active",mode==="employee");document.getElementById("loginButton").innerText=mode==="admin"?"LOGIN ADMIN":"LOGIN KARYAWAN";document.getElementById("email").placeholder=mode==="admin"?"Email Admin":"Email Karyawan";document.getElementById("loginModeText").innerText=mode==="admin"?"Login untuk mengelola sistem General Affair.":"Login khusus karyawan untuk pengambilan ATK.";document.getElementById("registerLink").style.display=mode==="employee"?"inline-block":"none";document.getElementById("error").innerText=""}
-function userRole(user){return String(user?.app_metadata?.role||user?.user_metadata?.role||"").toLowerCase()}
-function isAdminUser(user){return ['admin','ga','superadmin'].includes(String(user?.app_metadata?.role||"").toLowerCase())}
-function isEmployeeUser(user){return ['karyawan','employee'].includes(String(user?.app_metadata?.role||user?.user_metadata?.role||"").toLowerCase())}
-async function login(){const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value,error=document.getElementById("error");error.innerText="";if(!email||!password){error.innerText="Email dan password wajib diisi.";return}const {data,error:e}=await supabaseClient.auth.signInWithPassword({email,password});if(e){error.innerText="Login gagal: "+e.message;return}const user=data.user;if(loginMode==="admin"&&!isAdminUser(user)){await supabaseClient.auth.signOut();error.innerText="Akun ini bukan akun Admin GA. Gunakan menu Karyawan jika akun Anda karyawan.";return}if(loginMode==="employee"&&!isEmployeeUser(user)){await supabaseClient.auth.signOut();error.innerText="Akun ini bukan akun Karyawan.";return}if(loginMode==="employee")showEmployee(user);else showDashboard(user)}
-
-function openRegisterModal(){setLoginMode('employee');document.getElementById('registerMessage').innerHTML='';['regName','regNik','regDept','regEmail','regPassword','regPassword2'].forEach(id=>document.getElementById(id).value='');document.getElementById('registerModal').style.display='flex'}
-function closeRegisterModal(){document.getElementById('registerModal').style.display='none'}
-function openForgotModal(){document.getElementById('forgotEmail').value=document.getElementById('email').value.trim();document.getElementById('forgotMessage').innerHTML='';document.getElementById('forgotModal').style.display='flex'}
-function closeForgotModal(){document.getElementById('forgotModal').style.display='none'}
-function togglePassword(id,btn){const el=document.getElementById(id);if(el.type==='password'){el.type='text';btn.innerText='🙈'}else{el.type='password';btn.innerText='👁'}}
-async function registerEmployee(){const name=document.getElementById('regName').value.trim(),nik=document.getElementById('regNik').value.trim(),dept=document.getElementById('regDept').value.trim(),email=document.getElementById('regEmail').value.trim(),password=document.getElementById('regPassword').value,password2=document.getElementById('regPassword2').value,msg=document.getElementById('registerMessage');msg.innerHTML='';if(!name||!nik||!dept||!email||!password||!password2){msg.innerHTML='<div class="danger-msg">Semua data wajib diisi.</div>';return}if(password.length<6){msg.innerHTML='<div class="danger-msg">Password minimal 6 karakter.</div>';return}if(password!==password2){msg.innerHTML='<div class="danger-msg">Konfirmasi password tidak sama.</div>';return}const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{full_name:name,nik,department:dept,role:'karyawan'}}});if(error){msg.innerHTML='<div class="danger-msg">Pendaftaran gagal: '+escapeHtml(error.message)+'</div>';return}if(data.session){msg.innerHTML='<div class="success-msg">Akun berhasil dibuat dan Anda dapat login sebagai Karyawan.</div>';setTimeout(()=>{closeRegisterModal();setLoginMode('employee');document.getElementById('email').value=email;document.getElementById('password').value='';},1200)}else{msg.innerHTML='<div class="success-msg">Akun berhasil didaftarkan. Silakan cek email untuk konfirmasi akun, lalu login sebagai Karyawan.</div>'}}
-async function sendResetPassword(){const email=document.getElementById('forgotEmail').value.trim(),msg=document.getElementById('forgotMessage');msg.innerHTML='';if(!email){msg.innerHTML='<div class="danger-msg">Email wajib diisi.</div>';return}const redirectTo=window.location.href.split('#')[0];const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});if(error){msg.innerHTML='<div class="danger-msg">Gagal mengirim link: '+escapeHtml(error.message)+'</div>';return}msg.innerHTML='<div class="success-msg">Link reset password sudah dikirim. Silakan cek email Anda.</div>'}
-async function updateNewPassword(){const p=document.getElementById('newPassword').value,p2=document.getElementById('newPassword2').value,msg=document.getElementById('resetMessage');msg.innerHTML='';if(p.length<6){msg.innerHTML='<div class="danger-msg">Password minimal 6 karakter.</div>';return}if(p!==p2){msg.innerHTML='<div class="danger-msg">Konfirmasi password tidak sama.</div>';return}const {error}=await supabaseClient.auth.updateUser({password:p});if(error){msg.innerHTML='<div class="danger-msg">Gagal memperbarui password: '+escapeHtml(error.message)+'</div>';return}msg.innerHTML='<div class="success-msg">Password berhasil diperbarui. Silakan login kembali.</div>';setTimeout(async()=>{await supabaseClient.auth.signOut();document.getElementById('resetModal').style.display='none';document.getElementById('loginPage').style.display='flex';},1500)}
-
-supabaseClient.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY'){document.getElementById('resetModal').style.display='flex'}});
-async function logout(){await supabaseClient.auth.signOut();location.reload()}
-async function showDashboard(user){
-  currentUser=user;
-  document.getElementById("loginPage").style.display="none";
-  document.getElementById("employeeDashboard").style.display="none";
-  document.getElementById("dashboard").style.display="block";
-  document.getElementById("userEmail").innerText=user?.email||"Admin";
-  await syncCloudData();
-  loadAll();
+async function login(){
+ const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value,error=document.getElementById("error");
+ error.innerText="";
+ if(!email||!password){error.innerText="Email dan password wajib diisi.";return}
+ const {data,error:e}=await supabaseClient.auth.signInWithPassword({email,password});
+ if(e){error.innerText="Login gagal: "+e.message;return}
+ showDashboard(data.user);
 }
-function showEmployee(user){currentUser=user;document.getElementById("loginPage").style.display="none";document.getElementById("dashboard").style.display="none";document.getElementById("employeeDashboard").style.display="block";document.getElementById("employeeWelcome").innerText=user?.user_metadata?.full_name||user?.email||"Karyawan";document.getElementById("empDate").value=today();document.getElementById("empName").value=user?.user_metadata?.full_name||"";document.getElementById("empNik").value=user?.user_metadata?.nik||"";document.getElementById("empDept").value=user?.user_metadata?.department||"";loadEmployeeItems();loadEmployeeRequests()}
+async function logout(){await supabaseClient.auth.signOut();location.reload()}
+function showDashboard(user){document.getElementById("loginPage").style.display="none";document.getElementById("dashboard").style.display="block";document.getElementById("userEmail").innerText=user?.email||"Admin";loadAll()}
 function showPage(page,el){
  const target=document.getElementById(page);if(!target)return;
  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));target.classList.add("active");
  document.querySelectorAll(".menu").forEach(x=>x.classList.remove("active"));if(el)el.classList.add("active");
- if(page==="inventory")loadInventory();if(page==="atkRequests")loadAtkRequests();if(page==="procurement")loadProcurements();if(page==="maintenance")loadMaintenance();if(page==="transport")loadTransport();
+ if(page==="inventory")loadInventory();if(page==="procurement")loadProcurements();if(page==="maintenance")loadMaintenance();if(page==="transport")loadTransport();
 }
-function loadAll(){loadInventory();loadAtkRequests();loadProcurements();loadMaintenance();loadTransport()}
-
-/* ================= PENGAMBILAN ATK KARYAWAN ================= */
-async function loadEmployeeItems(){const sel=document.getElementById("empItem");if(!sel)return;const {data,error}=await supabaseClient.from("inventaris_atk").select("id,kode_barang,nama_barang,satuan,stok,stok_minimum").order("nama_barang");if(error){sel.innerHTML='<option value="">Gagal memuat barang</option>';return}sel.innerHTML='<option value="">Pilih barang ATK</option>'+(data||[]).map(x=>`<option value="${x.id}" data-name="${escapeHtml(x.nama_barang)}" data-code="${escapeHtml(x.kode_barang)}" data-unit="${escapeHtml(x.satuan||'Pcs')}" data-stock="${x.stok}">${escapeHtml(x.kode_barang)} - ${escapeHtml(x.nama_barang)} (Stok: ${x.stok})</option>`).join("");employeeItemInfo()}
-function employeeItemInfo(){const sel=document.getElementById("empItem"),info=document.getElementById("empItemInfo");if(!sel||!info)return;const opt=sel.options[sel.selectedIndex];if(!opt||!opt.value){info.innerText="Pilih barang.";return}const stock=Number(opt.dataset.stock||0);info.innerHTML=`Stok tersedia: <b>${stock}</b> ${escapeHtml(opt.dataset.unit||"")}${stock<=0?' — <span class="danger">STOK HABIS</span>':''}`;document.getElementById("empQty").max=stock}
-function atkReqStatusClass(s){return s==="Disetujui"?"status-approved":s==="Ditolak"?"status-rejected":"status-pending"}
-function generateAtkReqNo(){return "ATK-"+new Date().getFullYear()+String(Date.now()).slice(-6)}
-async function submitAtkRequest(){const name=document.getElementById("empName").value.trim(),nik=document.getElementById("empNik").value.trim(),dept=document.getElementById("empDept").value.trim(),itemId=document.getElementById("empItem").value,qty=Number(document.getElementById("empQty").value||0),date=document.getElementById("empDate").value,purpose=document.getElementById("empPurpose").value.trim();if(!name||!nik||!dept||!itemId||qty<1||!date||!purpose){alert("Semua data pengambilan wajib diisi.");return}const opt=document.getElementById("empItem").options[document.getElementById("empItem").selectedIndex],stock=Number(opt.dataset.stock||0);if(qty>stock){alert("Jumlah melebihi stok tersedia ("+stock+").");return}const payload={request_no:generateAtkReqNo(),tanggal:date,employee_user_id:currentUser?.id||null,employee_name:name,employee_nik:nik,department:dept,item_id:Number(itemId),item_code:opt.dataset.code||"",item_name:opt.dataset.name||"",qty,unit:opt.dataset.unit||"Pcs",purpose,status:"Menunggu Approval"};const {error}=await supabaseClient.from("atk_pengambilan").insert(payload);if(error){alert("Gagal mengajukan: "+error.message+"\nPastikan tabel atk_pengambilan sudah dibuat di Supabase.");return}alert("Pengambilan ATK berhasil diajukan. Menunggu approval Admin GA.");document.getElementById("empQty").value=1;document.getElementById("empPurpose").value="";loadEmployeeItems();loadEmployeeRequests()}
-async function loadEmployeeRequests(){const table=document.getElementById("employeeRequestTable");if(!table||!currentUser)return;const {data,error}=await supabaseClient.from("atk_pengambilan").select("*").eq("employee_user_id",currentUser.id).order("created_at",{ascending:false});if(error){table.innerHTML='<tr><td colspan="7">Belum dapat memuat riwayat. Pastikan tabel Supabase sudah dibuat.</td></tr>';return}table.innerHTML=(data||[]).length?(data||[]).map(x=>`<tr><td><b>${escapeHtml(x.request_no)}</b></td><td>${escapeHtml(x.tanggal||"-")}</td><td>${escapeHtml(x.item_name||"-")}</td><td>${x.qty} ${escapeHtml(x.unit||"")}</td><td>${escapeHtml(x.purpose||"-")}</td><td><span class="employee-status ${atkReqStatusClass(x.status)}">${escapeHtml(x.status)}</span></td><td>${escapeHtml(x.admin_note||"-")}</td></tr>`).join(""):'<tr><td colspan="7">Belum ada pengambilan ATK.</td></tr>'}
-async function loadAtkRequests(){const table=document.getElementById("atkRequestTable");if(!table)return;const search=(document.getElementById("atkReqSearch")?.value||"").toLowerCase().trim(),filter=document.getElementById("atkReqFilter")?.value||"";let {data,error}=await supabaseClient.from("atk_pengambilan").select("*").order("created_at",{ascending:false});if(error){table.innerHTML='<tr><td colspan="9">Gagal memuat data pengambilan ATK. Pastikan tabel atk_pengambilan sudah dibuat.</td></tr>';return}const all=data||[];document.getElementById("atkReqTotal").innerText=all.length;document.getElementById("atkReqWaiting").innerText=all.filter(x=>x.status==="Menunggu Approval").length;document.getElementById("atkReqApproved").innerText=all.filter(x=>x.status==="Disetujui").length;document.getElementById("atkReqRejected").innerText=all.filter(x=>x.status==="Ditolak").length;data=all.filter(x=>(!filter||x.status===filter)&&(!search||[x.employee_name,x.employee_nik,x.department,x.item_name,x.item_code,x.purpose].some(v=>String(v||"").toLowerCase().includes(search))));table.innerHTML=data.length?data.map(x=>{let actions=x.status==="Menunggu Approval"?`<button class="action-edit" onclick="approveAtkRequest(${x.id})">✓ Setujui</button><button class="action-delete" onclick="rejectAtkRequest(${x.id})">✕ Tolak</button>`:'<span>-</span>';return `<tr><td><b>${escapeHtml(x.request_no)}</b></td><td>${escapeHtml(x.tanggal||"-")}</td><td><b>${escapeHtml(x.employee_name)}</b><br>${escapeHtml(x.employee_nik||"")}</td><td>${escapeHtml(x.department||"-")}</td><td>${escapeHtml(x.item_code||"")} - ${escapeHtml(x.item_name||"")}</td><td>${x.qty} ${escapeHtml(x.unit||"")}</td><td>${escapeHtml(x.purpose||"-")}</td><td><span class="employee-status ${atkReqStatusClass(x.status)}">${escapeHtml(x.status)}</span></td><td class="no-print"><div class="actions">${actions}</div></td></tr>`}).join(""):'<tr><td colspan="9">Belum ada permintaan ATK.</td></tr>'}
-async function approveAtkRequest(id){if(!confirm("Setujui pengambilan ATK ini? Stok akan otomatis berkurang."))return;const {data:req,error:er}=await supabaseClient.from("atk_pengambilan").select("*").eq("id",id).single();if(er||!req){alert("Data tidak ditemukan.");return}if(req.status!=="Menunggu Approval"){alert("Permintaan sudah diproses.");return}const {data:item,error:ie}=await supabaseClient.from("inventaris_atk").select("id,stok").eq("id",req.item_id).single();if(ie||!item){alert("Barang tidak ditemukan.");return}if(Number(item.stok)<Number(req.qty)){alert("Stok tidak mencukupi. Stok saat ini: "+item.stok);return}const {error:ue}=await supabaseClient.from("inventaris_atk").update({stok:Number(item.stok)-Number(req.qty)}).eq("id",item.id);if(ue){alert("Gagal mengurangi stok: "+ue.message);return}const {error:re}=await supabaseClient.from("atk_pengambilan").update({status:"Disetujui",approved_by:currentUser?.email||"Admin GA",approved_at:new Date().toISOString()}).eq("id",id);if(re){alert("Stok sudah berkurang, tetapi status gagal diperbarui: "+re.message);return}loadAtkRequests();loadInventory();alert("Pengambilan disetujui dan stok otomatis berkurang.")}
-async function rejectAtkRequest(id){const note=prompt("Alasan penolakan (opsional):","");if(note===null)return;const {error}=await supabaseClient.from("atk_pengambilan").update({status:"Ditolak",admin_note:note,approved_by:currentUser?.email||"Admin GA",approved_at:new Date().toISOString()}).eq("id",id);if(error){alert("Gagal menolak: "+error.message);return}loadAtkRequests()}
+function loadAll(){loadInventory();loadProcurements();loadMaintenance();loadTransport()}
 
 /* INVENTORY */
 let editingId=null;
@@ -430,52 +340,8 @@ async function editItem(id){const {data,error}=await supabaseClient.from("invent
 async function deleteItem(id){if(!confirm("Yakin menghapus barang?"))return;const {error}=await supabaseClient.from("inventaris_atk").delete().eq("id",id);if(error)alert(error.message);else loadInventory()}
 
 /* LOCAL STORAGE GENERIC */
-/* ================= PENYIMPANAN CLOUD SUPABASE ================= */
-const CLOUD_MODULES={
-  "ga_procurement_data":"procurement",
-  "ga_maintenance_data":"maintenance",
-  "ga_vendor_data":"vendor",
-  "ga_vehicles":"vehicles",
-  "ga_p2h":"p2h",
-  "ga_borrowings":"borrowings"
-};
 const getLS=k=>{try{return JSON.parse(localStorage.getItem(k)||"[]")}catch{return[]}};
-const setLS=(k,v)=>{
-  localStorage.setItem(k,JSON.stringify(v));
-  if(currentUser && isAdminUser(currentUser) && CLOUD_MODULES[k]){
-    cloudSave(CLOUD_MODULES[k],v);
-  }
-};
-
-async function cloudSave(module,data){
-  try{
-    const {error}=await supabaseClient.from("ga_records").upsert({
-      module,
-      data,
-      updated_by:currentUser?.id||null,
-      updated_at:new Date().toISOString()
-    },{onConflict:"module"});
-    if(error) console.error("Gagal menyimpan ke Supabase:",module,error);
-  }catch(e){console.error("Cloud save error:",e)}
-}
-
-async function syncCloudData(){
-  if(!currentUser || !isAdminUser(currentUser)) return;
-  const {data:cloud,error}=await supabaseClient.from("ga_records").select("module,data");
-  if(error){
-    console.warn("ga_records belum tersedia atau RLS belum benar:",error.message);
-    return;
-  }
-  const map={};(cloud||[]).forEach(r=>map[r.module]=r.data||[]);
-  for(const [key,module] of Object.entries(CLOUD_MODULES)){
-    const local=getLS(key);
-    if(Object.prototype.hasOwnProperty.call(map,module)){
-      localStorage.setItem(key,JSON.stringify(map[module]));
-    }else if(local.length){
-      await cloudSave(module,local);
-    }
-  }
-}
+const setLS=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 
 /* PROCUREMENT */
 let editingProcId=null;
@@ -541,252 +407,8 @@ function loadVehicles(){vehicleTable.innerHTML=getVehicles().length?getVehicles(
 function printTransport(){let active=document.querySelector(".transport-pane[style*='block']");if(!active){document.getElementById("trDashboard").style.display="block"}window.print()}
 
 /* SESSION */
-async function checkSession(){const {data}=await supabaseClient.auth.getSession();if(data.session){const user=data.session.user;if(isEmployeeUser(user))showEmployee(user);else if(isAdminUser(user))showDashboard(user);else{await supabaseClient.auth.signOut();}}}
-setLoginMode("admin");checkSession();fillMonthsOnce();
+async function checkSession(){const {data}=await supabaseClient.auth.getSession();if(data.session)showDashboard(data.session.user)}
+checkSession();fillMonthsOnce();
 </script>
-
-<!-- ================= FINAL GA DATA LAYER ================= -->
-<style>
-.ga-final-panel{background:#fff;border-radius:14px;padding:18px;box-shadow:0 4px 18px #0000000d;margin-top:18px}
-.ga-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.ga-grid .form-group{margin:0}
-.ga-btn{padding:10px 14px;border-radius:8px;background:#1769e8;color:#fff}
-.ga-btn.gray{background:#6c757d}.ga-btn.green{background:#198754}.ga-btn.red{background:#dc3545}.ga-btn.yellow{background:#ffc107;color:#111}
-.ga-kpi{font-size:25px;font-weight:bold;color:#1769e8}
-.ga-table{overflow:auto}
-.ga-table table{min-width:1000px}
-.ga-print-title{display:none}
-@media(max-width:1000px){.ga-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:650px){.ga-grid{grid-template-columns:1fr}}
-@media print{
-  @page{size:A4 portrait;margin:12mm}
-  body{background:#fff!important}
-  #loginPage,.sidebar,.logout,.menu,.header button,.btn-primary,.ga-no-print,.modal{display:none!important}
-  .content{margin:0!important;padding:0!important}
-  .page{display:none!important}
-  .page.active{display:block!important}
-  .ga-print-title{display:block;text-align:center;margin-bottom:15px}
-  .card,.table-box,.ga-final-panel{box-shadow:none;border:1px solid #ddd}
-  table{min-width:0!important;font-size:10px}
-  th,td{padding:6px}
-}
-</style>
-
-<script>
-/* Final cloud-first helpers. Existing functions are preserved; these functions
-   provide dedicated Supabase tables for Transportasi/P2H/Service/Peminjaman
-   and are intentionally independent from localStorage. */
-const GA_TABLES = {
-  kendaraan:"kendaraan",
-  p2h:"p2h",
-  peminjaman:"peminjaman_kendaraan",
-  service:"service_kendaraan",
-  atk:"atk_pengambilan"
-};
-
-function gaUser(){
-  try { return supabaseClient.auth.getUser(); } catch(e){ return null; }
-}
-async function gaInsert(table,payload){
-  const {data,error}=await supabaseClient.from(table).insert(payload).select().single();
-  if(error) throw error;
-  return data;
-}
-async function gaSelect(table,opts={}){
-  let q=supabaseClient.from(table).select(opts.select||"*");
-  if(opts.order) q=q.order(opts.order,{ascending:opts.ascending??false});
-  if(opts.eq) Object.entries(opts.eq).forEach(([k,v])=>q=q.eq(k,v));
-  const {data,error}=await q;
-  if(error) throw error;
-  return data||[];
-}
-async function gaUpdate(table,id,payload){
-  const {data,error}=await supabaseClient.from(table).update(payload).eq("id",id).select().single();
-  if(error) throw error;
-  return data;
-}
-async function gaDelete(table,id){
-  const {error}=await supabaseClient.from(table).delete().eq("id",id);
-  if(error) throw error;
-}
-function gaFmt(n){return Number(n||0).toLocaleString("id-ID")}
-function gaDate(){return new Date().toISOString().slice(0,10)}
-function gaEscape(v){return typeof escapeHtml==="function"?escapeHtml(v??""):String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-
-/* ================= TRANSPORT FINAL ================= */
-function gaTransportHTML(){
-  const p=document.getElementById("transport");
-  if(!p)return;
-  p.innerHTML=`
-  <div class="header">
-    <div><h1>🚗 Transportasi</h1><p>P2H, peminjaman kendaraan, kilometer bulanan dan jadwal service.</p></div>
-    <button class="btn-primary ga-no-print" onclick="window.print()">🖨️ Cetak A4</button>
-  </div>
-  <div class="ga-print-title"><h2>LAPORAN TRANSPORTASI</h2><div>PT. PERMATA INDAH MULIA PUTRA PERSADA</div></div>
-  <div class="cards">
-    <div class="card">🚗 Kendaraan<span class="number" id="gaVehCount">0</span></div>
-    <div class="card">📋 P2H Bulan Ini<span class="number" id="gaP2HCount">0</span></div>
-    <div class="card">🛣️ KM Bulan Ini<span class="number" id="gaKmMonth">0</span></div>
-    <div class="card">🔧 Service Mendatang<span class="number" id="gaServiceDue">0</span></div>
-  </div>
-
-  <div class="ga-final-panel">
-    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
-      <h3>🚗 Master Kendaraan</h3>
-      <button class="ga-btn ga-no-print" onclick="gaVehicleModal()">➕ Tambah Kendaraan</button>
-    </div>
-    <div class="ga-table"><table><thead><tr>
-      <th>Nomor Polisi</th><th>Unit</th><th>Merk/Model</th><th>Driver/PIC</th><th>KM Terakhir</th><th>Service Berikut</th><th>Aksi</th>
-    </tr></thead><tbody id="gaVehicleTable"></tbody></table></div>
-  </div>
-
-  <div class="ga-final-panel">
-    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
-      <h3>📋 P2H / Rekap Kilometer</h3>
-      <button class="ga-btn ga-no-print" onclick="gaP2HModal()">➕ Input P2H</button>
-    </div>
-    <div class="ga-table"><table><thead><tr>
-      <th>Tanggal</th><th>Kendaraan</th><th>Driver</th><th>KM Awal</th><th>KM Akhir</th><th>Jarak</th><th>Tujuan</th><th>Kondisi</th><th>Aksi</th>
-    </tr></thead><tbody id="gaP2HTable"></tbody></table></div>
-  </div>
-
-  <div class="ga-final-panel">
-    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
-      <h3>🔑 Peminjaman Kendaraan</h3>
-      <button class="ga-btn ga-no-print" onclick="gaBorrowModal()">➕ Peminjaman</button>
-    </div>
-    <div class="ga-table"><table><thead><tr>
-      <th>Tanggal</th><th>Kendaraan</th><th>Peminjam</th><th>Tujuan</th><th>KM Awal</th><th>KM Akhir</th><th>Jarak</th><th>Status</th><th>Aksi</th>
-    </tr></thead><tbody id="gaBorrowTable"></tbody></table></div>
-  </div>
-
-  <div class="ga-final-panel">
-    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
-      <h3>🔧 Jadwal Service Kendaraan</h3>
-      <button class="ga-btn ga-no-print" onclick="gaServiceModal()">➕ Catat Service</button>
-    </div>
-    <div class="ga-table"><table><thead><tr>
-      <th>Tanggal</th><th>Kendaraan</th><th>KM Service</th><th>Service Berikut</th><th>Sisa KM</th><th>Status</th><th>Keterangan</th><th>Aksi</th>
-    </tr></thead><tbody id="gaServiceTable"></tbody></table></div>
-  </div>`;
-
-  gaLoadAll();
-}
-
-function gaOpenForm(title,fields,onSave){
-  const old=document.getElementById("gaTempModal"); if(old)old.remove();
-  const m=document.createElement("div");m.className="modal";m.id="gaTempModal";m.style.display="flex";
-  m.innerHTML=`<div class="modal-box" style="width:700px"><h2>${title}</h2><div class="form-grid" id="gaTempFields"></div><div class="modal-actions"><button class="cancel-btn" onclick="document.getElementById('gaTempModal').remove()">Batal</button><button class="save-btn" id="gaTempSave">Simpan</button></div></div>`;
-  document.body.appendChild(m);
-  const box=m.querySelector("#gaTempFields");
-  fields.forEach(f=>{
-    const d=document.createElement("div");d.className="form-group"+(f.full?" full":"");
-    d.innerHTML=`<label>${f.label}</label>${f.type==="select"?`<select id="${f.id}">${f.options.map(o=>`<option value="${gaEscape(o.value??o)}">${gaEscape(o.label??o)}</option>`).join("")}</select>`:`<input id="${f.id}" type="${f.type||"text"}" value="${gaEscape(f.value||"")}" placeholder="${gaEscape(f.placeholder||"")}">`}`;
-    box.appendChild(d);
-  });
-  m.querySelector("#gaTempSave").onclick=async()=>{try{await onSave(m);m.remove();await gaLoadAll()}catch(e){alert("Gagal menyimpan: "+e.message)}};
-}
-async function gaVehicleModal(){
-  gaOpenForm("Tambah Kendaraan",[
-    {id:"vplat",label:"Nomor Polisi",placeholder:"B 1234 ABC"},
-    {id:"vunit",label:"Nama Unit",placeholder:"Fortuner"},
-    {id:"vmodel",label:"Merk / Model"},
-    {id:"vdriver",label:"Driver / PIC"},
-    {id:"vkm",label:"KM Terakhir",type:"number",value:0},
-    {id:"vnext",label:"Service Berikut (KM)",type:"number",value:10000}
-  ],async m=>gaInsert(GA_TABLES.kendaraan,{nomor_polisi:m.querySelector("#vplat").value,unit:m.querySelector("#vunit").value,merk_model:m.querySelector("#vmodel").value,driver_pic:m.querySelector("#vdriver").value,km_terakhir:Number(m.querySelector("#vkm").value||0),service_berikut:Number(m.querySelector("#vnext").value||0)}));
-}
-async function gaP2HModal(){
-  const vs=await gaSelect(GA_TABLES.kendaraan,{order:"unit"});
-  if(!vs.length){alert("Tambahkan kendaraan terlebih dahulu.");return}
-  gaOpenForm("Input P2H / Kilometer",[
-    {id:"pdate",label:"Tanggal",type:"date",value:gaDate()},
-    {id:"pveh",label:"Kendaraan",type:"select",options:vs.map(v=>({value:v.id,label:`${v.nomor_polisi||""} - ${v.unit||v.merk_model||""}`}))},
-    {id:"pdriver",label:"Driver / Pengemudi"},
-    {id:"pawal",label:"KM Awal",type:"number",value:0},
-    {id:"pakhir",label:"KM Akhir",type:"number",value:0},
-    {id:"ptujuan",label:"Tujuan / Keperluan",full:true},
-    {id:"pkondisi",label:"Kondisi P2H",type:"select",options:["Baik","Ada Catatan","Tidak Layak"]},
-    {id:"pcatatan",label:"Catatan",full:true}
-  ],async m=>{
-    const a=Number(m.querySelector("#pawal").value||0),b=Number(m.querySelector("#pakhir").value||0);
-    if(b<a)throw Error("KM akhir tidak boleh lebih kecil dari KM awal.");
-    const v=vs.find(x=>String(x.id)===m.querySelector("#pveh").value);
-    await gaInsert(GA_TABLES.p2h,{tanggal:m.querySelector("#pdate").value,kendaraan_id:v.id,kendaraan:`${v.nomor_polisi||""} - ${v.unit||v.merk_model||""}`,driver:m.querySelector("#pdriver").value,km_awal:a,km_akhir:b,jarak:b-a,tujuan:m.querySelector("#ptujuan").value,kondisi:m.querySelector("#pkondisi").value,catatan:m.querySelector("#pcatatan").value});
-    await gaUpdate(GA_TABLES.kendaraan,v.id,{km_terakhir:b});
-  });
-}
-async function gaBorrowModal(){
-  const vs=await gaSelect(GA_TABLES.kendaraan,{order:"unit"}); if(!vs.length){alert("Tambahkan kendaraan terlebih dahulu.");return}
-  gaOpenForm("Peminjaman Kendaraan",[
-    {id:"bdate",label:"Tanggal",type:"date",value:gaDate()},
-    {id:"bveh",label:"Kendaraan",type:"select",options:vs.map(v=>({value:v.id,label:`${v.nomor_polisi||""} - ${v.unit||v.merk_model||""}`}))},
-    {id:"bname",label:"Peminjam / Driver"},
-    {id:"bpurpose",label:"Tujuan",full:true},
-    {id:"bstart",label:"KM Awal",type:"number",value:0},
-    {id:"bend",label:"KM Akhir",type:"number",value:0},
-    {id:"bstatus",label:"Status",type:"select",options:["Diajukan","Disetujui","Selesai","Dibatalkan"]},
-    {id:"bnote",label:"Catatan",full:true}
-  ],async m=>{
-    const a=Number(m.querySelector("#bstart").value||0),b=Number(m.querySelector("#bend").value||0);
-    if(b&&b<a)throw Error("KM akhir tidak boleh lebih kecil dari KM awal.");
-    const v=vs.find(x=>String(x.id)===m.querySelector("#bveh").value);
-    await gaInsert(GA_TABLES.peminjaman,{tanggal:m.querySelector("#bdate").value,kendaraan_id:v.id,kendaraan:`${v.nomor_polisi||""} - ${v.unit||v.merk_model||""}`,peminjam:m.querySelector("#bname").value,tujuan:m.querySelector("#bpurpose").value,km_awal:a,km_akhir:b||null,jarak:b?b-a:null,status:m.querySelector("#bstatus").value,catatan:m.querySelector("#bnote").value});
-  });
-}
-async function gaServiceModal(){
-  const vs=await gaSelect(GA_TABLES.kendaraan,{order:"unit"}); if(!vs.length){alert("Tambahkan kendaraan terlebih dahulu.");return}
-  gaOpenForm("Catat Service Kendaraan",[
-    {id:"sdate",label:"Tanggal Service",type:"date",value:gaDate()},
-    {id:"sveh",label:"Kendaraan",type:"select",options:vs.map(v=>({value:v.id,label:`${v.nomor_polisi||""} - ${v.unit||v.merk_model||""}`}))},
-    {id:"skm",label:"KM Saat Service",type:"number",value:0},
-    {id:"snext",label:"Service Berikut (KM)",type:"number",value:0},
-    {id:"stype",label:"Jenis Service"},
-    {id:"snote",label:"Keterangan",full:true}
-  ],async m=>{
-    const v=vs.find(x=>String(x.id)===m.querySelector("#sveh").value);
-    const km=Number(m.querySelector("#skm").value||0),next=Number(m.querySelector("#snext").value||0);
-    await gaInsert(GA_TABLES.service,{tanggal:m.querySelector("#sdate").value,kendaraan_id:v.id,kendaraan:`${v.nomor_polisi||""} - ${v.unit||v.merk_model||""}`,km_service:km,service_berikut:next,jenis_service:m.querySelector("#stype").value,keterangan:m.querySelector("#snote").value});
-    await gaUpdate(GA_TABLES.kendaraan,v.id,{km_terakhir:km,service_berikut:next});
-  });
-}
-async function gaLoadAll(){
-  try{
-    const [v,p,b,s]=await Promise.all([
-      gaSelect(GA_TABLES.kendaraan,{order:"unit"}),
-      gaSelect(GA_TABLES.p2h,{order:"tanggal"}),
-      gaSelect(GA_TABLES.peminjaman,{order:"tanggal"}),
-      gaSelect(GA_TABLES.service,{order:"tanggal"})
-    ]);
-    const ym=new Date().toISOString().slice(0,7);
-    const pm=p.filter(x=>String(x.tanggal||"").slice(0,7)===ym);
-    const km=pm.reduce((a,x)=>a+Number(x.jarak||0),0);
-    const due=v.filter(x=>Number(x.service_berikut||0)>0 && Number(x.km_terakhir||0)>=Number(x.service_berikut||0)-1000).length;
-    document.getElementById("gaVehCount").innerText=v.length;
-    document.getElementById("gaP2HCount").innerText=pm.length;
-    document.getElementById("gaKmMonth").innerText=gaFmt(km);
-    document.getElementById("gaServiceDue").innerText=due;
-
-    document.getElementById("gaVehicleTable").innerHTML=v.length?v.map(x=>`<tr><td>${gaEscape(x.nomor_polisi)}</td><td>${gaEscape(x.unit)}</td><td>${gaEscape(x.merk_model)}</td><td>${gaEscape(x.driver_pic)}</td><td>${gaFmt(x.km_terakhir)}</td><td>${gaFmt(x.service_berikut)}</td><td><button class="action-delete ga-no-print" onclick="gaDel('kendaraan',${x.id})">🗑️</button></td></tr>`).join(""):"<tr><td colspan=7>Belum ada kendaraan.</td></tr>";
-    document.getElementById("gaP2HTable").innerHTML=pm.length?pm.map(x=>`<tr><td>${gaEscape(x.tanggal)}</td><td>${gaEscape(x.kendaraan)}</td><td>${gaEscape(x.driver)}</td><td>${gaFmt(x.km_awal)}</td><td>${gaFmt(x.km_akhir)}</td><td>${gaFmt(x.jarak)}</td><td>${gaEscape(x.tujuan)}</td><td>${gaEscape(x.kondisi)}</td><td><button class="action-delete ga-no-print" onclick="gaDel('p2h',${x.id})">🗑️</button></td></tr>`).join(""):"<tr><td colspan=9>Belum ada P2H bulan ini.</td></tr>";
-    document.getElementById("gaBorrowTable").innerHTML=b.length?b.map(x=>`<tr><td>${gaEscape(x.tanggal)}</td><td>${gaEscape(x.kendaraan)}</td><td>${gaEscape(x.peminjam)}</td><td>${gaEscape(x.tujuan)}</td><td>${gaFmt(x.km_awal)}</td><td>${gaFmt(x.km_akhir||0)}</td><td>${x.jarak==null?"-":gaFmt(x.jarak)}</td><td>${gaEscape(x.status)}</td><td><button class="action-delete ga-no-print" onclick="gaDel('peminjaman_kendaraan',${x.id})">🗑️</button></td></tr>`).join(""):"<tr><td colspan=9>Belum ada peminjaman.</td></tr>";
-    document.getElementById("gaServiceTable").innerHTML=s.length?s.map(x=>{
-      const veh=v.find(q=>String(q.id)===String(x.kendaraan_id)); const current=Number(veh?.km_terakhir||x.km_service||0); const remain=Number(x.service_berikut||0)-current; const st=remain<=0?"SEGERA SERVICE":remain<=1000?"SERVICE MENDEKATI":"AMAN";
-      return `<tr><td>${gaEscape(x.tanggal)}</td><td>${gaEscape(x.kendaraan)}</td><td>${gaFmt(x.km_service)}</td><td>${gaFmt(x.service_berikut)}</td><td>${gaFmt(remain)}</td><td><b>${st}</b></td><td>${gaEscape(x.keterangan)}</td><td><button class="action-delete ga-no-print" onclick="gaDel('service_kendaraan',${x.id})">🗑️</button></td></tr>`;
-    }).join(""):"<tr><td colspan=8>Belum ada riwayat service.</td></tr>";
-  }catch(e){console.error("GA cloud load:",e)}
-}
-async function gaDel(table,id){
-  if(!confirm("Hapus data ini?"))return;
-  try{await gaDelete(table,id);await gaLoadAll()}catch(e){alert("Gagal menghapus: "+e.message)}
-}
-
-/* Initialize the final Transport page after the existing DOM has loaded. */
-document.addEventListener("DOMContentLoaded",()=>{
-  gaTransportHTML();
-});
-</script>
-<!-- ================= END FINAL GA DATA LAYER ================= -->
-
 </body>
 </html>
