@@ -2,111 +2,203 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>General Affair - Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>General Affair - Admin</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;
- font-family:Arial,sans-serif;
- background:linear-gradient(135deg,#062b55,#0d5dcc);
- min-height:100vh;
- display:flex;
- align-items:center;
- justify-content:center;
-}
-.login{
- width:380px;
- background:white;
- padding:35px;
- border-radius:18px;
- box-shadow:0 15px 50px #0005;
- text-align:center;
-}
-.logo{font-size:55px}
-h1{margin:10px 0 5px;color:#123}
-p{color:#777}
-input{
- width:100%;
- padding:14px;
- margin:8px 0;
- border:1px solid #ddd;
- border-radius:9px;
- font-size:15px;
-}
-button{
- width:100%;
- padding:14px;
- border:0;
- border-radius:9px;
- background:#1769e8;
- color:white;
- font-size:16px;
- cursor:pointer;
- margin-top:10px;
-}
-button:hover{background:#0d57c7}
-#error{color:#d00;font-size:13px}
 
-#dashboard{display:none;width:100%;min-height:100vh;background:#f4f7fb}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f7fb;
+}
+
+/* LOGIN */
+#loginPage{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#062b55,#1769e8);
+}
+
+.login-box{
+    width:380px;
+    max-width:90%;
+    background:white;
+    padding:35px;
+    border-radius:18px;
+    box-shadow:0 15px 50px #0005;
+    text-align:center;
+}
+
+.logo{
+    font-size:55px;
+}
+
+.login-box h1{
+    margin:10px 0 5px;
+    color:#123;
+}
+
+.company{
+    color:#777;
+    font-size:13px;
+    margin-bottom:25px;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    margin:7px 0;
+    border:1px solid #ddd;
+    border-radius:9px;
+    font-size:15px;
+}
+
+button{
+    border:0;
+    border-radius:9px;
+    padding:13px 18px;
+    cursor:pointer;
+}
+
+.login-btn{
+    width:100%;
+    background:#1769e8;
+    color:white;
+    font-size:16px;
+    margin-top:10px;
+}
+
+.login-btn:hover{
+    background:#0d57c7;
+}
+
+#error{
+    color:#d00;
+    font-size:13px;
+    margin-top:12px;
+}
+
+/* DASHBOARD */
+#dashboard{
+    display:none;
+}
+
 .sidebar{
- position:fixed;
- width:240px;
- height:100vh;
- background:#062b55;
- color:white;
- padding:22px 15px;
+    position:fixed;
+    width:240px;
+    height:100vh;
+    background:#062b55;
+    color:white;
+    padding:22px 15px;
 }
-.sidebar h2{font-size:16px;margin-bottom:30px}
+
+.sidebar h2{
+    font-size:17px;
+    margin-bottom:25px;
+}
+
 .menu{
- padding:13px;
- margin:4px 0;
- border-radius:8px;
- cursor:pointer;
+    padding:13px;
+    margin:4px 0;
+    border-radius:8px;
+    cursor:pointer;
 }
-.menu:hover,.active{background:#1769e8}
+
+.menu:hover,
+.menu.active{
+    background:#1769e8;
+}
+
+.logout{
+    width:100%;
+    background:#dc3545;
+    color:white;
+    margin-top:25px;
+}
+
 .content{
- margin-left:240px;
- padding:30px;
+    margin-left:240px;
+    padding:30px;
 }
+
 .header{
- display:flex;
- justify-content:space-between;
- align-items:center;
- margin-bottom:25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
 }
-.header h1{margin:0}
+
+.header h1{
+    margin:0;
+    color:#123;
+}
+
+.header p{
+    color:#777;
+}
+
 .cards{
- display:grid;
- grid-template-columns:repeat(4,1fr);
- gap:18px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
 }
+
 .card{
- background:white;
- padding:22px;
- border-radius:14px;
- box-shadow:0 4px 18px #0000000d;
+    background:white;
+    padding:22px;
+    border-radius:14px;
+    box-shadow:0 4px 18px #0000000d;
 }
-.card b{font-size:30px;display:block;margin-top:10px}
+
+.card-number{
+    display:block;
+    font-size:30px;
+    font-weight:bold;
+    margin-top:10px;
+    color:#1769e8;
+}
+
 .grid{
- display:grid;
- grid-template-columns:2fr 1fr;
- gap:18px;
- margin-top:18px;
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:18px;
+    margin-top:18px;
 }
+
 .quick{
- display:grid;
- grid-template-columns:repeat(3,1fr);
- gap:10px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
 }
-.quick button{background:#eef5ff;color:#1769e8}
-.logout{background:#dc3545;margin-top:25px}
+
+.quick button{
+    background:#eef5ff;
+    color:#1769e8;
+}
+
 @media(max-width:800px){
- .sidebar{width:190px}
- .content{margin-left:190px}
- .cards{grid-template-columns:repeat(2,1fr)}
- .grid{grid-template-columns:1fr}
+
+    .sidebar{
+        width:190px;
+    }
+
+    .content{
+        margin-left:190px;
+    }
+
+    .cards{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .grid{
+        grid-template-columns:1fr;
+    }
 }
 </style>
 </head>
@@ -114,147 +206,273 @@ button:hover{background:#0d57c7}
 <body>
 
 <!-- LOGIN -->
-<div class="login" id="login">
- <div class="logo">🏢</div>
- <h1>GENERAL AFFAIR</h1>
- <p>PT. PERMATA INDAH MULIA PUTRA PERSADA</p>
+<div id="loginPage">
 
- <input id="username" placeholder="Username">
- <input id="password" type="password" placeholder="Password">
+    <div class="login-box">
 
- <button onclick="login()">LOGIN ADMIN</button>
+        <div class="logo">🏢</div>
 
- <div id="error"></div>
+        <h1>GENERAL AFFAIR</h1>
+
+        <div class="company">
+            PT. PERMATA INDAH MULIA PUTRA PERSADA
+        </div>
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Email Admin"
+        >
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+        >
+
+        <button class="login-btn" onclick="login()">
+            LOGIN ADMIN
+        </button>
+
+        <div id="error"></div>
+
+    </div>
+
 </div>
 
 
 <!-- DASHBOARD -->
 <div id="dashboard">
 
- <aside class="sidebar">
-  <h2>🏢 GENERAL AFFAIR</h2>
+    <aside class="sidebar">
 
-  <div class="menu active">🏠 Dashboard</div>
-  <div class="menu">📦 Inventaris & ATK</div>
-  <div class="menu">🛒 Pengadaan</div>
-  <div class="menu">🔧 Pemeliharaan</div>
-  <div class="menu">🚗 Transportasi</div>
-  <div class="menu">📄 Surat & Dokumen</div>
-  <div class="menu">🏢 Meeting Room</div>
-  <div class="menu">☕ Konsumsi & Pantry</div>
-  <div class="menu">🧹 Kebersihan</div>
-  <div class="menu">📊 Laporan</div>
+        <h2>🏢 GENERAL AFFAIR</h2>
 
-  <button class="logout" onclick="logout()">LOGOUT</button>
- </aside>
+        <div class="menu active">🏠 Dashboard</div>
+        <div class="menu">📦 Inventaris & ATK</div>
+        <div class="menu">🛒 Pengadaan</div>
+        <div class="menu">🔧 Pemeliharaan</div>
+        <div class="menu">🚗 Transportasi</div>
+        <div class="menu">📄 Surat & Dokumen</div>
+        <div class="menu">🏢 Meeting Room</div>
+        <div class="menu">☕ Konsumsi & Pantry</div>
+        <div class="menu">🧹 Kebersihan</div>
+        <div class="menu">📊 Laporan</div>
 
+        <button class="logout" onclick="logout()">
+            LOGOUT
+        </button>
 
- <main class="content">
-
-  <div class="header">
-   <div>
-    <h1>Dashboard General Affair</h1>
-    <p>Selamat datang, Admin GA</p>
-   </div>
-   <b>👤 Admin GA</b>
-  </div>
+    </aside>
 
 
-  <div class="cards">
+    <main class="content">
 
-   <div class="card">
-    📋 Permintaan Hari Ini
-    <b>12</b>
-   </div>
+        <div class="header">
 
-   <div class="card">
-    🛒 Pengadaan Aktif
-    <b>8</b>
-   </div>
+            <div>
+                <h1>Dashboard General Affair</h1>
+                <p id="userEmail">Admin</p>
+            </div>
 
-   <div class="card">
-    🔧 Pemeliharaan
-    <b>5</b>
-   </div>
+            <b>👤 ADMIN GA</b>
 
-   <div class="card">
-    📦 Stok Menipis
-    <b>7</b>
-   </div>
-
-  </div>
+        </div>
 
 
-  <div class="grid">
+        <div class="cards">
 
-   <div class="card">
-    <h3>📊 Ringkasan General Affair</h3>
-    <p>Permintaan menunggu: <b>12</b></p>
-    <p>Permintaan diproses: <b>9</b></p>
-    <p>Permintaan selesai: <b>24</b></p>
-   </div>
+            <div class="card">
+                📋 Permintaan Hari Ini
+                <span class="card-number">12</span>
+            </div>
 
-   <div class="card">
-    <h3>🔔 Pengingat</h3>
-    <p>⚠️ Stok ATK menipis</p>
-    <p>🔧 Maintenance AC</p>
-    <p>🚗 Pajak kendaraan</p>
-   </div>
+            <div class="card">
+                🛒 Pengadaan Aktif
+                <span class="card-number">8</span>
+            </div>
 
-  </div>
+            <div class="card">
+                🔧 Pemeliharaan
+                <span class="card-number">5</span>
+            </div>
+
+            <div class="card">
+                📦 Stok Menipis
+                <span class="card-number">7</span>
+            </div>
+
+        </div>
 
 
-  <div class="card" style="margin-top:18px">
-   <h3>⚡ Akses Cepat</h3>
+        <div class="grid">
 
-   <div class="quick">
-    <button>➕<br>Buat Permintaan</button>
-    <button>📦<br>Cek Stok ATK</button>
-    <button>🏢<br>Reservasi Ruangan</button>
-    <button>🔧<br>Pengajuan Maintenance</button>
-    <button>🚗<br>Pengajuan Kendaraan</button>
-    <button>📊<br>Laporan GA</button>
-   </div>
+            <div class="card">
 
-  </div>
+                <h3>📊 Ringkasan General Affair</h3>
 
- </main>
+                <p>
+                    Permintaan menunggu:
+                    <b>12</b>
+                </p>
+
+                <p>
+                    Permintaan diproses:
+                    <b>9</b>
+                </p>
+
+                <p>
+                    Permintaan selesai:
+                    <b>24</b>
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>🔔 Pengingat</h3>
+
+                <p>⚠️ Stok ATK menipis</p>
+                <p>🔧 Maintenance AC</p>
+                <p>🚗 Pajak kendaraan</p>
+
+            </div>
+
+        </div>
+
+
+        <div class="card" style="margin-top:18px">
+
+            <h3>⚡ Akses Cepat</h3>
+
+            <div class="quick">
+
+                <button>➕<br>Buat Permintaan</button>
+                <button>📦<br>Cek Stok ATK</button>
+                <button>🏢<br>Reservasi Ruangan</button>
+                <button>🔧<br>Pengajuan Maintenance</button>
+                <button>🚗<br>Pengajuan Kendaraan</button>
+                <button>📊<br>Laporan GA</button>
+
+            </div>
+
+        </div>
+
+    </main>
+
 </div>
 
 
 <script>
 
-function login(){
+/* SUPABASE */
 
- let username=document.getElementById("username").value;
- let password=document.getElementById("password").value;
+const SUPABASE_URL =
+"https://szstsrakcsnrcpbhjoxe.supabase.co";
 
- /*
-  LOGIN DEMO
-  Username : admin
-  Password : admin123
- */
+const SUPABASE_KEY =
+"sb_publishable_U81cdDTNfUg90P6000CgtA_77M0iTJQ";
 
- if(username==="admin" && password==="admin123"){
+const supabaseClient =
+supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
 
-   document.getElementById("login").style.display="none";
-   document.getElementById("dashboard").style.display="block";
 
- }else{
+/* LOGIN */
 
-   document.getElementById("error").innerHTML=
-   "Username atau password salah.";
+async function login(){
 
- }
+    const email =
+        document.getElementById("email").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    const error =
+        document.getElementById("error");
+
+    error.innerText = "";
+
+    if(!email || !password){
+
+        error.innerText =
+            "Email dan password wajib diisi.";
+
+        return;
+    }
+
+    const {data, error:loginError} =
+        await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+    if(loginError){
+
+        error.innerText =
+            "Login gagal: " + loginError.message;
+
+        return;
+    }
+
+    showDashboard(data.user);
 
 }
 
-function logout(){
 
- document.getElementById("dashboard").style.display="none";
- document.getElementById("login").style.display="block";
+/* TAMPILKAN DASHBOARD */
+
+function showDashboard(user){
+
+    document.getElementById("loginPage")
+        .style.display = "none";
+
+    document.getElementById("dashboard")
+        .style.display = "block";
+
+    document.getElementById("userEmail")
+        .innerText = user.email;
 
 }
+
+
+/* LOGOUT */
+
+async function logout(){
+
+    await supabaseClient.auth.signOut();
+
+    document.getElementById("dashboard")
+        .style.display = "none";
+
+    document.getElementById("loginPage")
+        .style.display = "flex";
+
+    document.getElementById("email").value = "";
+    document.getElementById("password").value = "";
+
+}
+
+
+/* CEK SESSION SAAT WEBSITE DIBUKA */
+
+async function checkSession(){
+
+    const {data} =
+        await supabaseClient.auth.getSession();
+
+    if(data.session){
+
+        showDashboard(data.session.user);
+
+    }
+
+}
+
+checkSession();
 
 </script>
 
