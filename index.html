@@ -340,9 +340,64 @@ async function logout(){await supabaseClient.auth.signOut();location.reload()}
 function openForgotPassword(){document.getElementById("resetEmail").value=document.getElementById("email").value.trim();document.getElementById("resetMessage").innerText="";document.getElementById("forgotPasswordModal").style.display="flex"}
 function openSignup(){document.getElementById("signupEmail").value="";document.getElementById("signupPassword").value="";document.getElementById("signupPassword2").value="";document.getElementById("signupMessage").innerText="";document.getElementById("signupModal").style.display="flex"}
 function closeAuthModal(id){document.getElementById(id).style.display="none"}
-async function sendResetPassword(){const email=document.getElementById("resetEmail").value.trim(),msg=document.getElementById("resetMessage");msg.className="auth-message";if(!email){msg.className="auth-message auth-error";msg.innerText="Email wajib diisi.";return}const redirectTo=window.location.origin+window.location.pathname;const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});if(error){msg.className="auth-message auth-error";msg.innerText="Gagal mengirim link: "+error.message;return}msg.className="auth-message auth-success";msg.innerText="Link reset password sudah dikirim. Cek inbox atau Spam email Anda."}
-async function signupAdmin(){const email=document.getElementById("signupEmail").value.trim(),password=document.getElementById("signupPassword").value,password2=document.getElementById("signupPassword2").value,msg=document.getElementById("signupMessage");msg.className="auth-message";if(!email||!password||!password2){msg.className="auth-message auth-error";msg.innerText="Semua field wajib diisi.";return}if(password.length<6){msg.className="auth-message auth-error";msg.innerText="Password minimal 6 karakter.";return}if(password!==password2){msg.className="auth-message auth-error";msg.innerText="Konfirmasi password tidak sama.";return}const {data,error}=await supabaseClient.auth.signUp({email,password});if(error){msg.className="auth-message auth-error";msg.innerText="Gagal membuat akun: "+error.message;return}if(data.session){closeAuthModal("signupModal");showDashboard(data.user)}else{msg.className="auth-message auth-success";msg.innerText="Akun berhasil dibuat. Cek email untuk konfirmasi akun, kemudian login."}}
-async function updateNewPassword(){const password=document.getElementById("newPassword").value,password2=document.getElementById("newPassword2").value,msg=document.getElementById("newPasswordMessage");msg.className="auth-message";if(password.length<6){msg.className="auth-message auth-error";msg.innerText="Password minimal 6 karakter.";return}if(password!==password2){msg.className="auth-message auth-error";msg.innerText="Konfirmasi password tidak sama.";return}const {error}=await supabaseClient.auth.updateUser({password});if(error){msg.className="auth-message auth-error";msg.innerText="Gagal mengubah password: "+error.message;return}msg.className="auth-message auth-success";msg.innerText="Password berhasil diubah. Silakan login kembali.";setTimeout(async()=>{await supabaseClient.auth.signOut();closeAuthModal("newPasswordModal");location.href=window.location.pathname},1200)}
+function authErrorText(error){
+  const m=(error?.message||String(error||"Gagal terhubung ke Supabase")).trim();
+  const l=m.toLowerCase();
+  if(l.includes("failed to fetch")||l.includes("load failed")||l.includes("networkerror")) return "Tidak dapat terhubung ke Supabase. Jika file dibuka langsung (file://), jalankan melalui localhost/hosting HTTPS.";
+  if(l.includes("user already registered")) return "Email tersebut sudah terdaftar. Gunakan email lain atau pilih Lupa Password.";
+  if(l.includes("email not confirmed")) return "Email belum dikonfirmasi. Cek inbox/Spam lalu klik link konfirmasi.";
+  if(l.includes("password")&&l.includes("6")) return "Password minimal 6 karakter.";
+  return m;
+}
+function supabaseWebReady(){
+  if(location.protocol==="file:"){
+    return "File sedang dibuka langsung dari komputer (file://). Untuk Login, Buat Akun, dan Lupa Password, buka melalui localhost atau hosting HTTPS.";
+  }
+  if(location.protocol!=="http:"&&location.protocol!=="https:") return "Halaman harus dibuka melalui HTTP/HTTPS.";
+  return "";
+}
+async function sendResetPassword(){
+  const email=document.getElementById("resetEmail").value.trim(),msg=document.getElementById("resetMessage");
+  msg.className="auth-message";
+  if(!email){msg.className="auth-message auth-error";msg.innerText="Email wajib diisi.";return}
+  const ready=supabaseWebReady();
+  if(ready){msg.className="auth-message auth-error";msg.innerText=ready;return}
+  try{
+    const redirectTo=window.location.origin+window.location.pathname;
+    const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});
+    if(error){msg.className="auth-message auth-error";msg.innerText="Gagal mengirim link: "+authErrorText(error);return}
+    msg.className="auth-message auth-success";msg.innerText="Link reset password sudah dikirim. Cek inbox atau Spam email Anda.";
+  }catch(e){msg.className="auth-message auth-error";msg.innerText="Gagal mengirim link: "+authErrorText(e)}
+}
+async function signupAdmin(){
+  const email=document.getElementById("signupEmail").value.trim(),password=document.getElementById("signupPassword").value,password2=document.getElementById("signupPassword2").value,msg=document.getElementById("signupMessage");
+  msg.className="auth-message";
+  if(!email||!password||!password2){msg.className="auth-message auth-error";msg.innerText="Semua field wajib diisi.";return}
+  if(!/^\S+@\S+\.\S+$/.test(email)){msg.className="auth-message auth-error";msg.innerText="Format email tidak valid.";return}
+  if(password.length<6){msg.className="auth-message auth-error";msg.innerText="Password minimal 6 karakter.";return}
+  if(password!==password2){msg.className="auth-message auth-error";msg.innerText="Konfirmasi password tidak sama.";return}
+  const ready=supabaseWebReady();
+  if(ready){msg.className="auth-message auth-error";msg.innerText=ready;return}
+  try{
+    msg.className="auth-message";msg.innerText="Sedang membuat akun...";
+    const {data,error}=await supabaseClient.auth.signUp({email,password});
+    if(error){msg.className="auth-message auth-error";msg.innerText="Gagal membuat akun: "+authErrorText(error);return}
+    if(data?.session){closeAuthModal("signupModal");showDashboard(data.user)}
+    else{msg.className="auth-message auth-success";msg.innerText="Akun berhasil dibuat. Cek email untuk konfirmasi akun, kemudian login."}
+  }catch(e){msg.className="auth-message auth-error";msg.innerText="Gagal membuat akun: "+authErrorText(e)}
+}
+async function updateNewPassword(){
+  const password=document.getElementById("newPassword").value,password2=document.getElementById("newPassword2").value,msg=document.getElementById("newPasswordMessage");
+  msg.className="auth-message";
+  if(password.length<6){msg.className="auth-message auth-error";msg.innerText="Password minimal 6 karakter.";return}
+  if(password!==password2){msg.className="auth-message auth-error";msg.innerText="Konfirmasi password tidak sama.";return}
+  try{
+    const {error}=await supabaseClient.auth.updateUser({password});
+    if(error){msg.className="auth-message auth-error";msg.innerText="Gagal mengubah password: "+authErrorText(error);return}
+    msg.className="auth-message auth-success";msg.innerText="Password berhasil diubah. Silakan login kembali.";
+    setTimeout(async()=>{await supabaseClient.auth.signOut();closeAuthModal("newPasswordModal");location.href=window.location.pathname},1200)
+  }catch(e){msg.className="auth-message auth-error";msg.innerText="Gagal mengubah password: "+authErrorText(e)}
+}
 
 function showDashboard(user){document.getElementById("loginPage").style.display="none";document.getElementById("dashboard").style.display="block";document.getElementById("userEmail").innerText=user?.email||"Admin";loadAll()}
 function showPage(page,el){
@@ -444,7 +499,18 @@ function printTransport(){let active=document.querySelector(".transport-pane[sty
 
 /* SESSION */
 async function checkSession(){const {data}=await supabaseClient.auth.getSession();if(data.session)showDashboard(data.session.user)}
-supabaseClient.auth.onAuthStateChange((event)=>{if(event==="PASSWORD_RECOVERY"){document.getElementById("newPasswordMessage").innerText="";document.getElementById("newPasswordModal").style.display="flex"}});
+supabaseClient.auth.onAuthStateChange((event,session)=>{
+  if(event==="PASSWORD_RECOVERY"){
+    document.getElementById("newPassword").value="";
+    document.getElementById("newPassword2").value="";
+    document.getElementById("newPasswordMessage").innerText="";
+    document.getElementById("newPasswordModal").style.display="flex";
+  }
+});
+if(location.protocol==="file:"){
+  const e=document.getElementById("error");
+  e.innerText="ℹ️ Buka melalui localhost/hosting HTTPS agar fitur akun & password dapat terhubung ke Supabase.";
+}
 checkSession();fillMonthsOnce();
 </script>
 </body>
