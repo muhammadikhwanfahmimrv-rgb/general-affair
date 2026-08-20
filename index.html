@@ -70,6 +70,20 @@ table{width:100%;border-collapse:collapse;min-width:850px}th,td{padding:11px;bor
  .print-title h2,.print-title p{margin:3px}
  .signature{display:grid!important}
 }
+
+.atk-role-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.role-btn{padding:12px;border-radius:9px;background:#eef2f7;color:#172033;font-weight:bold}
+.role-btn.active{background:#1769e8;color:#fff}
+.employee-shell{display:none;min-height:100vh;background:#f4f7fb}
+.employee-top{background:#062b55;color:#fff;padding:18px 28px;display:flex;justify-content:space-between;align-items:center}
+.employee-content{padding:28px;max-width:1200px;margin:auto}
+.atk-request-card{background:#fff;padding:22px;border-radius:14px;box-shadow:0 4px 18px #0000000d;margin-bottom:20px}
+.status-pending{background:#fff3cd;color:#856404}.status-approved{background:#d1e7dd;color:#0f5132}.status-rejected{background:#f8d7da;color:#842029}
+.atk-history table{min-width:900px}
+.stock-actions{display:flex;gap:5px;flex-wrap:wrap}
+.stock-in{background:#198754;color:#fff;padding:7px 9px;border-radius:6px}
+.stock-out{background:#fd7e14;color:#fff;padding:7px 9px;border-radius:6px}
+@media(max-width:700px){.employee-top{display:block}.employee-top>*{margin-bottom:8px}}
 </style>
 </head>
 <body>
@@ -83,6 +97,7 @@ table{width:100%;border-collapse:collapse;min-width:850px}th,td{padding:11px;bor
   <input id="password" type="password" placeholder="Password">
   <button class="login-btn" onclick="login()">LOGIN ADMIN</button>
   <a class="login-link" onclick="openForgotPassword()">🔑 Lupa Password?</a>
+  <a class="login-link" onclick="openSignup()">👤 Buat Akun Admin</a>
   <div id="error"></div>
  </div>
 </div>
@@ -112,11 +127,44 @@ table{width:100%;border-collapse:collapse;min-width:850px}th,td{padding:11px;bor
  <div class="modal-actions"><button class="save-btn" onclick="updateNewPassword()">Simpan Password</button></div>
 </div></div>
 
+<div id="employeeShell" class="employee-shell">
+ <div class="employee-top">
+  <div><b>🏢 GENERAL AFFAIR</b><br><small>Portal Karyawan - Pengambilan ATK</small></div>
+  <div>👤 <span id="employeeEmail">Karyawan</span> <button class="btn-secondary" onclick="employeeLogout()">Logout</button></div>
+ </div>
+ <div class="employee-content">
+  <div class="header"><div><h1>📦 Pengambilan ATK</h1><p>Ajukan pengambilan ATK dan lihat riwayat pengambilan Anda.</p></div></div>
+  <div class="summary">
+   <div class="card">📋 Total Pengajuan<span class="number" id="empTotalReq">0</span></div>
+   <div class="card">⏳ Menunggu<span class="number" id="empPendingReq">0</span></div>
+   <div class="card">✅ Disetujui<span class="number" id="empApprovedReq">0</span></div>
+   <div class="card">📦 Item Tersedia<span class="number" id="empAvailableItems">0</span></div>
+  </div>
+  <div class="atk-request-card">
+   <h2>➕ Ajukan Pengambilan ATK</h2>
+   <div class="form-grid">
+    <div class="form-group"><label>Nama Karyawan</label><input id="empName" placeholder="Nama lengkap"></div>
+    <div class="form-group"><label>Departemen</label><input id="empDept" placeholder="Departemen"></div>
+    <div class="form-group"><label>Barang ATK</label><select id="empItem"></select></div>
+    <div class="form-group"><label>Jumlah</label><input id="empQty" type="number" min="1" value="1"></div>
+    <div class="form-group full"><label>Keperluan</label><textarea id="empPurpose" placeholder="Contoh: kebutuhan pekerjaan harian"></textarea></div>
+   </div>
+   <button class="btn-primary" onclick="submitAtkRequest()">📤 Ajukan Pengambilan</button>
+   <div id="empRequestMsg" class="auth-message"></div>
+  </div>
+  <div class="atk-request-card atk-history">
+   <div class="toolbar no-print"><h2 style="margin:0">📜 Riwayat Pengambilan Saya</h2><button class="btn-primary" onclick="window.print()">🖨️ CETAK A4</button></div>
+   <table><thead><tr><th>Tanggal</th><th>Barang</th><th>Jumlah</th><th>Keperluan</th><th>Status</th><th>Diproses</th></tr></thead><tbody id="empHistoryTable"></tbody></table>
+  </div>
+ </div>
+</div>
+
 <div id="dashboard">
 <aside class="sidebar">
  <h2>🏢 GENERAL AFFAIR</h2>
  <div class="menu active" onclick="showPage('home',this)">🏠 Dashboard</div>
  <div class="menu" onclick="showPage('inventory',this)">📦 Inventaris & ATK</div>
+  <div class="menu" onclick="showPage('atkRequests',this)">📋 Pengambilan ATK <span id="atkPendingBadge" class="badge yellow">0</span></div>
  <div class="menu" onclick="showPage('procurement',this)">🛒 Pengadaan</div>
  <div class="menu" onclick="showPage('maintenance',this)">🔧 Pemeliharaan</div>
  <div class="menu" onclick="showPage('transport',this)">🚗 Transportasi</div>
@@ -156,6 +204,20 @@ table{width:100%;border-collapse:collapse;min-width:850px}th,td{padding:11px;bor
   <input class="search" id="search" placeholder="🔍 Cari kode atau nama barang..." oninput="loadInventory()">
   <button class="btn-primary no-print" onclick="window.print()">🖨️ CETAK A4</button>
   <table><thead><tr><th>Kode</th><th>Nama Barang</th><th>Kategori</th><th>Satuan</th><th>Stok</th><th>Minimum</th><th>Lokasi</th><th>Status</th><th class="no-print">Aksi</th></tr></thead><tbody id="inventoryTable"></tbody></table>
+ </div>
+</section>
+
+<section id="atkRequests" class="page">
+ <div class="header"><div><h1>📋 Pengambilan ATK</h1><p>Kelola pengajuan pengambilan ATK dari karyawan.</p></div><button class="btn-primary no-print" onclick="loadAtkRequests()">🔄 Refresh</button></div>
+ <div class="summary">
+  <div class="card">📋 Total<span class="number" id="atkReqTotal">0</span></div>
+  <div class="card">⏳ Menunggu<span class="number" id="atkReqPending">0</span></div>
+  <div class="card">✅ Disetujui<span class="number" id="atkReqApproved">0</span></div>
+  <div class="card">❌ Ditolak<span class="number" id="atkReqRejected">0</span></div>
+ </div>
+ <div class="table-box">
+  <div class="toolbar no-print"><div class="toolbar-left"><input id="atkReqSearch" placeholder="🔍 Cari karyawan/barang/departemen..." oninput="loadAtkRequests()"><select id="atkReqFilter" onchange="loadAtkRequests()"><option value="">Semua Status</option><option>Menunggu</option><option>Disetujui</option><option>Ditolak</option></select></div><button class="btn-primary" onclick="window.print()">🖨️ CETAK A4</button></div>
+  <table><thead><tr><th>No</th><th>Tanggal</th><th>Karyawan</th><th>Departemen</th><th>Barang</th><th>Jumlah</th><th>Keperluan</th><th>Status</th><th class="no-print">Aksi</th></tr></thead><tbody id="atkRequestsTable"></tbody></table>
  </div>
 </section>
 
@@ -275,6 +337,15 @@ table{width:100%;border-collapse:collapse;min-width:850px}th,td{padding:11px;bor
 <div class="modal-actions"><button class="cancel-btn" onclick="closeModal()">Batal</button><button class="save-btn" onclick="saveItem()">Simpan</button></div>
 </div></div>
 
+<!-- Stock Adjustment Modal -->
+<div class="modal" id="stockModal"><div class="modal-box"><h2 id="stockModalTitle">Update Stok</h2>
+ <div class="form-group"><label>Barang</label><input id="stockItemName" readonly></div>
+ <div class="form-group"><label>Jenis</label><select id="stockType"><option value="in">STOK MASUK (+)</option><option value="out">STOK KELUAR (-)</option></select></div>
+ <div class="form-group"><label>Jumlah</label><input id="stockQty" type="number" min="1" value="1"></div>
+ <div class="form-group"><label>Keterangan</label><input id="stockNote" placeholder="Contoh: pembelian / koreksi stok"></div>
+ <div class="modal-actions"><button class="cancel-btn" onclick="closeStockModal()">Batal</button><button class="save-btn" onclick="saveStockAdjustment()">Simpan</button></div>
+</div></div>
+
 <!-- Procurement Modal -->
 <div class="modal" id="procurementModal"><div class="modal-box"><h2 id="procModalTitle">Buat Pengadaan</h2>
 <div class="form-grid"><div class="form-group"><label>No. Pengadaan</label><input id="procNo" readonly></div><div class="form-group"><label>Tanggal</label><input id="procDate" type="date"></div>
@@ -324,6 +395,31 @@ const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 function escapeHtml(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
 function rupiah(n){return Number(n||0).toLocaleString("id-ID")}
 function today(){return new Date().toISOString().slice(0,10)}
+let loginRole="admin";
+let currentUser=null;
+function selectLoginRole(role){
+ loginRole=role;
+ document.getElementById("adminRoleBtn").classList.toggle("active",role==="admin");
+ document.getElementById("employeeRoleBtn").classList.toggle("active",role==="employee");
+ document.getElementById("email").placeholder=role==="admin"?"Email Admin":"Email Karyawan";
+}
+async function getProfile(user){
+ const {data,error}=await supabaseClient.from("profiles").select("id,email,full_name,department,role").eq("id",user.id).maybeSingle();
+ if(error){console.warn(error);return {role:loginRole,email:user.email,full_name:"",department:""}}
+ return data||{role:loginRole,email:user.email,full_name:"",department:""};
+}
+function showEmployee(user,profile){
+ document.getElementById("loginPage").style.display="none";
+ document.getElementById("dashboard").style.display="none";
+ document.getElementById("employeeShell").style.display="block";
+ currentUser=user;
+ document.getElementById("employeeEmail").innerText=user?.email||"Karyawan";
+ document.getElementById("empName").value=profile?.full_name||"";
+ document.getElementById("empDept").value=profile?.department||"";
+ loadEmployeeItems();loadEmployeeHistory();
+}
+async function employeeLogout(){await supabaseClient.auth.signOut();location.reload()}
+
 
 async function login(){
  const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value,error=document.getElementById("error");
@@ -331,6 +427,10 @@ async function login(){
  if(!email||!password){error.innerText="Email dan password wajib diisi.";return}
  const {data,error:e}=await supabaseClient.auth.signInWithPassword({email,password});
  if(e){error.innerText="Login gagal: "+e.message;return}
+ const profile=await getProfile(data.user);
+ if(loginRole==="admin" && profile.role!=="admin"){await supabaseClient.auth.signOut();error.innerText="Akun ini bukan Admin GA. Pilih KARYAWAN untuk login sebagai karyawan.";return}
+ if(loginRole==="employee" && profile.role==="admin"){showDashboard(data.user);return}
+ if(loginRole==="employee"){showEmployee(data.user,profile);return}
  showDashboard(data.user);
 }
 async function logout(){await supabaseClient.auth.signOut();location.reload()}
@@ -369,21 +469,24 @@ async function sendResetPassword(){
   }catch(e){msg.className="auth-message auth-error";msg.innerText="Gagal mengirim link: "+authErrorText(e)}
 }
 async function signupAdmin(){
-  const email=document.getElementById("signupEmail").value.trim(),password=document.getElementById("signupPassword").value,password2=document.getElementById("signupPassword2").value,msg=document.getElementById("signupMessage");
-  msg.className="auth-message";
-  if(!email||!password||!password2){msg.className="auth-message auth-error";msg.innerText="Semua field wajib diisi.";return}
-  if(!/^\S+@\S+\.\S+$/.test(email)){msg.className="auth-message auth-error";msg.innerText="Format email tidak valid.";return}
-  if(password.length<6){msg.className="auth-message auth-error";msg.innerText="Password minimal 6 karakter.";return}
-  if(password!==password2){msg.className="auth-message auth-error";msg.innerText="Konfirmasi password tidak sama.";return}
-  const ready=supabaseWebReady();
-  if(ready){msg.className="auth-message auth-error";msg.innerText=ready;return}
-  try{
-    msg.className="auth-message";msg.innerText="Sedang membuat akun...";
-    const {data,error}=await supabaseClient.auth.signUp({email,password});
-    if(error){msg.className="auth-message auth-error";msg.innerText="Gagal membuat akun: "+authErrorText(error);return}
-    if(data?.session){closeAuthModal("signupModal");showDashboard(data.user)}
-    else{msg.className="auth-message auth-success";msg.innerText="Akun berhasil dibuat. Cek email untuk konfirmasi akun, kemudian login."}
-  }catch(e){msg.className="auth-message auth-error";msg.innerText="Gagal membuat akun: "+authErrorText(e)}
+ const email=document.getElementById("signupEmail").value.trim(),password=document.getElementById("signupPassword").value,password2=document.getElementById("signupPassword2").value,msg=document.getElementById("signupMessage");
+ msg.className="auth-message";
+ if(!email||!password||!password2){msg.className="auth-message auth-error";msg.innerText="Semua field wajib diisi.";return}
+ if(!/^\S+@\S+\.\S+$/.test(email)){msg.className="auth-message auth-error";msg.innerText="Format email tidak valid.";return}
+ if(password.length<6){msg.className="auth-message auth-error";msg.innerText="Password minimal 6 karakter.";return}
+ if(password!==password2){msg.className="auth-message auth-error";msg.innerText="Konfirmasi password tidak sama.";return}
+ const ready=supabaseWebReady();if(ready){msg.className="auth-message auth-error";msg.innerText=ready;return}
+ try{
+  msg.innerText="Sedang membuat akun karyawan...";
+  const {data,error}=await supabaseClient.auth.signUp({email,password});
+  if(error){msg.className="auth-message auth-error";msg.innerText="Gagal membuat akun: "+authErrorText(error);return}
+  if(data?.session){
+   await supabaseClient.from("profiles").upsert({id:data.user.id,email,role:"employee"});
+   closeAuthModal("signupModal");selectLoginRole("employee");showEmployee(data.user,{role:"employee",email});
+  }else{
+   msg.className="auth-message auth-success";msg.innerText="Akun karyawan berhasil dibuat. Cek email untuk konfirmasi, lalu login sebagai KARYAWAN.";
+  }
+ }catch(e){msg.className="auth-message auth-error";msg.innerText="Gagal membuat akun: "+authErrorText(e)}
 }
 async function updateNewPassword(){
   const password=document.getElementById("newPassword").value,password2=document.getElementById("newPassword2").value,msg=document.getElementById("newPasswordMessage");
@@ -403,9 +506,9 @@ function showPage(page,el){
  const target=document.getElementById(page);if(!target)return;
  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));target.classList.add("active");
  document.querySelectorAll(".menu").forEach(x=>x.classList.remove("active"));if(el)el.classList.add("active");
- if(page==="inventory")loadInventory();if(page==="procurement")loadProcurements();if(page==="maintenance")loadMaintenance();if(page==="transport")loadTransport();
+ if(page==="inventory")loadInventory();if(page==="atkRequests")loadAtkRequests();if(page==="procurement")loadProcurements();if(page==="maintenance")loadMaintenance();if(page==="transport")loadTransport();
 }
-function loadAll(){loadInventory();loadProcurements();loadMaintenance();loadTransport()}
+function loadAll(){loadInventory();loadAtkRequests();loadProcurements();loadMaintenance();loadTransport()}
 
 /* INVENTORY */
 let editingId=null;
@@ -416,7 +519,7 @@ async function loadInventory(){
  data=(data||[]).filter(x=>!s||(x.kode_barang||"").toLowerCase().includes(s)||(x.nama_barang||"").toLowerCase().includes(s));
  document.getElementById("totalItems").innerText=data.length;
  const low=data.filter(x=>Number(x.stok)<=Number(x.stok_minimum)).length;document.getElementById("lowStock").innerText=low;document.getElementById("lowStockHome").innerText=low;
- document.getElementById("inventoryTable").innerHTML=data.length?data.map(x=>{let l=Number(x.stok)<=Number(x.stok_minimum);return `<tr><td>${escapeHtml(x.kode_barang)}</td><td><b>${escapeHtml(x.nama_barang)}</b></td><td>${escapeHtml(x.kategori||"-")}</td><td>${escapeHtml(x.satuan||"-")}</td><td>${x.stok}</td><td>${x.stok_minimum}</td><td>${escapeHtml(x.lokasi||"-")}</td><td class="${l?'status-low':'status-ok'}">${l?'⚠️ MENIPIS':'✓ AMAN'}</td><td class="no-print"><button class="action-edit" onclick="editItem(${x.id})">✏️</button> <button class="action-delete" onclick="deleteItem(${x.id})">🗑️</button></td></tr>`}).join(""):'<tr><td colspan="9">Belum ada data barang.</td></tr>'
+ document.getElementById("inventoryTable").innerHTML=data.length?data.map(x=>{let l=Number(x.stok)<=Number(x.stok_minimum);return `<tr><td>${escapeHtml(x.kode_barang)}</td><td><b>${escapeHtml(x.nama_barang)}</b></td><td>${escapeHtml(x.kategori||"-")}</td><td>${escapeHtml(x.satuan||"-")}</td><td>${x.stok}</td><td>${x.stok_minimum}</td><td>${escapeHtml(x.lokasi||"-")}</td><td class="${l?'status-low':'status-ok'}">${l?'⚠️ MENIPIS':'✓ AMAN'}</td><td class="no-print"><div class="stock-actions"><button class="action-edit" onclick="editItem(${x.id})">✏️</button><button class="stock-in" onclick="openStockModal(${x.id},'in')">＋ Stok</button><button class="stock-out" onclick="openStockModal(${x.id},'out')">－ Stok</button><button class="action-delete" onclick="deleteItem(${x.id})">🗑️</button></div></td></tr>`}).join(""):'<tr><td colspan="9">Belum ada data barang.</td></tr>'
 }
 function openAddModal(){editingId=null;document.getElementById("modalTitle").innerText="Tambah Barang";["kode_barang","nama_barang","lokasi","keterangan"].forEach(id=>document.getElementById(id).value="");document.getElementById("kategori").value="";document.getElementById("satuan").value="Pcs";document.getElementById("stok").value=0;document.getElementById("stok_minimum").value=5;document.getElementById("itemModal").style.display="flex"}
 function closeModal(){document.getElementById("itemModal").style.display="none"}
@@ -429,6 +532,80 @@ async function saveItem(){
 async function editItem(id){const {data,error}=await supabaseClient.from("inventaris_atk").select("*").eq("id",id).single();if(error){alert(error.message);return}editingId=id;document.getElementById("modalTitle").innerText="Edit Barang";["kode_barang","nama_barang","lokasi","keterangan"].forEach(k=>document.getElementById(k).value=data[k]||"");document.getElementById("kategori").value=data.kategori||"";document.getElementById("satuan").value=data.satuan||"Pcs";document.getElementById("stok").value=data.stok||0;document.getElementById("stok_minimum").value=data.stok_minimum||5;document.getElementById("itemModal").style.display="flex"}
 async function deleteItem(id){if(!confirm("Yakin menghapus barang?"))return;const {error}=await supabaseClient.from("inventaris_atk").delete().eq("id",id);if(error)alert(error.message);else loadInventory()}
 
+
+/* STOK MASUK / KELUAR */
+let stockEditingId=null;
+async function openStockModal(id,type="in"){
+ const {data,error}=await supabaseClient.from("inventaris_atk").select("*").eq("id",id).single();
+ if(error){alert(error.message);return}
+ stockEditingId=id;document.getElementById("stockItemName").value=`${data.kode_barang} - ${data.nama_barang} (stok saat ini: ${data.stok})`;
+ document.getElementById("stockType").value=type;document.getElementById("stockQty").value=1;document.getElementById("stockNote").value="";
+ document.getElementById("stockModal").style.display="flex";
+}
+function closeStockModal(){document.getElementById("stockModal").style.display="none";stockEditingId=null}
+async function saveStockAdjustment(){
+ const qty=Number(document.getElementById("stockQty").value||0),type=document.getElementById("stockType").value,note=document.getElementById("stockNote").value.trim();
+ if(!stockEditingId||qty<=0){alert("Jumlah harus lebih dari 0.");return}
+ const {data,error}=await supabaseClient.from("inventaris_atk").select("stok").eq("id",stockEditingId).single();
+ if(error){alert(error.message);return}
+ const old=Number(data.stok||0),next=type==="in"?old+qty:old-qty;
+ if(next<0){alert("Stok tidak mencukupi.");return}
+ const r=await supabaseClient.from("inventaris_atk").update({stok:next}).eq("id",stockEditingId);
+ if(r.error){alert(r.error.message);return}
+ closeStockModal();loadInventory();alert(`Stok berhasil diperbarui${note?" - "+note:""}.`);
+}
+
+/* PENGAMBILAN ATK */
+async function loadEmployeeItems(){
+ const {data,error}=await supabaseClient.from("inventaris_atk").select("id,kode_barang,nama_barang,stok,satuan").order("nama_barang");
+ const e=document.getElementById("empItem");if(!e)return;
+ if(error){e.innerHTML='<option value="">Gagal memuat ATK</option>';return}
+ e.innerHTML='<option value="">Pilih barang</option>'+(data||[]).filter(x=>Number(x.stok)>0).map(x=>`<option value="${x.id}">${escapeHtml(x.nama_barang)} - stok ${x.stok} ${escapeHtml(x.satuan||"")}</option>`).join("");
+ document.getElementById("empAvailableItems").innerText=(data||[]).filter(x=>Number(x.stok)>0).length;
+}
+async function submitAtkRequest(){
+ const msg=document.getElementById("empRequestMsg"),itemId=document.getElementById("empItem").value,qty=Number(document.getElementById("empQty").value||0);
+ const name=document.getElementById("empName").value.trim(),dept=document.getElementById("empDept").value.trim(),purpose=document.getElementById("empPurpose").value.trim();
+ msg.className="auth-message";
+ if(!name||!dept||!itemId||qty<=0||!purpose){msg.className="auth-message auth-error";msg.innerText="Nama, departemen, barang, jumlah dan keperluan wajib diisi.";return}
+ const {data:userData}=await supabaseClient.auth.getUser();const user=userData?.user;
+ if(!user){msg.className="auth-message auth-error";msg.innerText="Sesi login sudah berakhir. Silakan login kembali.";return}
+ const {data:item,error:itemErr}=await supabaseClient.from("inventaris_atk").select("stok,nama_barang").eq("id",itemId).single();
+ if(itemErr){msg.className="auth-message auth-error";msg.innerText=itemErr.message;return}
+ if(qty>Number(item.stok)){msg.className="auth-message auth-error";msg.innerText=`Stok ${item.nama_barang} hanya ${item.stok}.`;return}
+ const {error}=await supabaseClient.from("atk_pengambilan").insert({user_id:user.id,employee_name:name,department:dept,item_id:Number(itemId),qty,purpose,status:"Menunggu"});
+ if(error){msg.className="auth-message auth-error";msg.innerText="Gagal mengajukan: "+error.message;return}
+ msg.className="auth-message auth-success";msg.innerText="Pengambilan ATK berhasil diajukan dan menunggu persetujuan Admin GA.";
+ document.getElementById("empQty").value=1;document.getElementById("empPurpose").value="";loadEmployeeHistory();
+}
+async function loadEmployeeHistory(){
+ const {data,error}=await supabaseClient.from("atk_pengambilan").select("id,user_id,created_at,employee_name,department,qty,purpose,status,processed_at,item_id,inventaris_atk(nama_barang,satuan)").order("created_at",{ascending:false});
+ if(error){document.getElementById("empHistoryTable").innerHTML=`<tr><td colspan="6">${escapeHtml(error.message)}</td></tr>`;return}
+ const {data:userData}=await supabaseClient.auth.getUser(),uid=userData?.user?.id;
+ const rows=(data||[]).filter(x=>x.user_id===uid);
+ document.getElementById("empTotalReq").innerText=rows.length;document.getElementById("empPendingReq").innerText=rows.filter(x=>x.status==="Menunggu").length;document.getElementById("empApprovedReq").innerText=rows.filter(x=>x.status==="Disetujui").length;
+ document.getElementById("empHistoryTable").innerHTML=rows.length?rows.map(x=>`<tr><td>${new Date(x.created_at).toLocaleDateString("id-ID")}</td><td>${escapeHtml(x.inventaris_atk?.nama_barang||"-")}</td><td>${x.qty} ${escapeHtml(x.inventaris_atk?.satuan||"")}</td><td>${escapeHtml(x.purpose)}</td><td><span class="badge ${x.status==="Disetujui"?"status-approved":x.status==="Ditolak"?"status-rejected":"status-pending"}">${x.status}</span></td><td>${x.processed_at?new Date(x.processed_at).toLocaleString("id-ID"):"-"}</td></tr>`).join(""):'<tr><td colspan="6">Belum ada riwayat pengambilan.</td></tr>';
+}
+async function loadAtkRequests(){
+ const s=(document.getElementById("atkReqSearch")?.value||"").toLowerCase().trim(),f=document.getElementById("atkReqFilter")?.value||"";
+ const {data,error}=await supabaseClient.from("atk_pengambilan").select("id,created_at,employee_name,department,qty,purpose,status,item_id,inventaris_atk(kode_barang,nama_barang,satuan)").order("created_at",{ascending:false});
+ if(error){document.getElementById("atkRequestsTable").innerHTML=`<tr><td colspan="9">${escapeHtml(error.message)}</td></tr>`;return}
+ const all=data||[],pending=all.filter(x=>x.status==="Menunggu").length;
+ document.getElementById("atkReqTotal").innerText=all.length;document.getElementById("atkReqPending").innerText=pending;document.getElementById("atkReqApproved").innerText=all.filter(x=>x.status==="Disetujui").length;document.getElementById("atkReqRejected").innerText=all.filter(x=>x.status==="Ditolak").length;document.getElementById("atkPendingBadge").innerText=pending;
+ const rows=all.filter(x=>(!f||x.status===f)&&(!s||JSON.stringify(x).toLowerCase().includes(s)));
+ document.getElementById("atkRequestsTable").innerHTML=rows.length?rows.map((x,i)=>`<tr><td>${i+1}</td><td>${new Date(x.created_at).toLocaleString("id-ID")}</td><td><b>${escapeHtml(x.employee_name)}</b></td><td>${escapeHtml(x.department)}</td><td>${escapeHtml(x.inventaris_atk?.nama_barang||"-")}</td><td>${x.qty} ${escapeHtml(x.inventaris_atk?.satuan||"")}</td><td>${escapeHtml(x.purpose)}</td><td><span class="badge ${x.status==="Disetujui"?"status-approved":x.status==="Ditolak"?"status-rejected":"status-pending"}">${x.status}</span></td><td class="no-print">${x.status==="Menunggu"?`<button class="stock-in" onclick="approveAtk(${x.id})">✓ Setujui</button> <button class="action-delete" onclick="rejectAtk(${x.id})">✕ Tolak</button>`:"-"}</td></tr>`).join(""):'<tr><td colspan="9">Belum ada pengajuan.</td></tr>';
+}
+async function approveAtk(id){
+ if(!confirm("Setujui pengambilan ATK ini? Stok akan otomatis berkurang."))return;
+ const {data,error}=await supabaseClient.rpc("approve_atk_pengambilan",{p_request_id:id});
+ if(error){alert("Gagal menyetujui: "+error.message);return}
+ alert("Pengambilan disetujui. Stok otomatis berkurang.");loadInventory();loadAtkRequests();
+}
+async function rejectAtk(id){
+ if(!confirm("Tolak pengambilan ATK ini?"))return;
+ const {error}=await supabaseClient.from("atk_pengambilan").update({status:"Ditolak",processed_at:new Date().toISOString()}).eq("id",id).eq("status","Menunggu");
+ if(error){alert(error.message);return}loadAtkRequests();
+}
 /* LOCAL STORAGE GENERIC */
 const getLS=k=>{try{return JSON.parse(localStorage.getItem(k)||"[]")}catch{return[]}};
 const setLS=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
@@ -497,7 +674,7 @@ function loadVehicles(){vehicleTable.innerHTML=getVehicles().length?getVehicles(
 function printTransport(){let active=document.querySelector(".transport-pane[style*='block']");if(!active){document.getElementById("trDashboard").style.display="block"}window.print()}
 
 /* SESSION */
-async function checkSession(){const {data}=await supabaseClient.auth.getSession();if(data.session)showDashboard(data.session.user)}
+async function checkSession(){const {data}=await supabaseClient.auth.getSession();if(data.session){const profile=await getProfile(data.session.user);if(profile.role==="employee")showEmployee(data.session.user,profile);else showDashboard(data.session.user)}}
 supabaseClient.auth.onAuthStateChange((event,session)=>{
   if(event==="PASSWORD_RECOVERY"){
     document.getElementById("newPassword").value="";
